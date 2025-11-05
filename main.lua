@@ -3,6 +3,8 @@
 require "constants"
 require "strategy"
 
+gfx = love.graphics
+
 -- runtime configuration
 
 USE_FIXED         = true
@@ -59,8 +61,8 @@ CENTER_CANVAS = nil
 -- screen helpers
 
 function cache_dims()
-  screen_w = love.graphics.getWidth()
-  screen_h = love.graphics.getHeight()
+  screen_w = gfx.getWidth()
+  screen_h = gfx.getHeight()
   -- scale: convert proportional constants to real pixels
   local base_h = 480
   local scale = screen_h / base_h
@@ -93,34 +95,34 @@ function draw_center_line()
   local step = ball_size * 2
   local y = 0
   while y < screen_h do
-    love.graphics.rectangle("fill", x, y, 4, ball_size)
+    gfx.rectangle("fill", x, y, 4, ball_size)
     y = y + step
   end
 end
 
 function build_center_canvas()
   if CENTER_CANVAS then CENTER_CANVAS:release() end
-  CENTER_CANVAS = love.graphics.newCanvas(screen_w, screen_h)
-  love.graphics.setCanvas(CENTER_CANVAS)
-  love.graphics.clear(0, 0, 0, 0)
-  love.graphics.setColor(COLOR_FG)
+  CENTER_CANVAS = gfx.newCanvas(screen_w, screen_h)
+  gfx.setCanvas(CENTER_CANVAS)
+  gfx.clear(0, 0, 0, 0)
+  gfx.setColor(COLOR_FG)
   draw_center_line()
-  love.graphics.setCanvas()
+  gfx.setCanvas()
 end
 
 -- text setup
 
 function build_static_texts()
-  FONT = love.graphics.getFont()
-  TXT_START = love.graphics.newText(FONT, "Press Space")
-  TXT_OVER = love.graphics.newText(FONT, "Game Over")
+  FONT = gfx.getFont()
+  TXT_START = gfx.newText(FONT, "Press Space")
+  TXT_OVER = gfx.newText(FONT, "Game Over")
 end
 
 function rebuild_score_texts()
   if TXT_L then TXT_L:release() end
   if TXT_R then TXT_R:release() end
-  TXT_L = love.graphics.newText(FONT, tostring(S.playerScore))
-  TXT_R = love.graphics.newText(FONT, tostring(S.oppScore))
+  TXT_L = gfx.newText(FONT, tostring(S.playerScore))
+  TXT_R = gfx.newText(FONT, tostring(S.oppScore))
 end
 
 -- initialization
@@ -318,28 +320,28 @@ end
 -- drawing
 
 function draw_bg()
-  love.graphics.clear(COLOR_BG)
-  love.graphics.setColor(COLOR_FG)
+  gfx.clear(COLOR_BG)
+  gfx.setColor(COLOR_FG)
 end
 
 function draw_paddle(p)
-  love.graphics.rectangle("fill", p.x, p.y, p.w, p.h)
+  gfx.rectangle("fill", p.x, p.y, p.w, p.h)
 end
 
 function draw_ball(b)
-  love.graphics.rectangle("fill", b.x, b.y, b.size, b.size)
+  gfx.rectangle("fill", b.x, b.y, b.size, b.size)
 end
 
 function draw_scores()
-  love.graphics.draw(TXT_L, screen_w / 2 - 60, SCORE_OFFSET_Y)
-  love.graphics.draw(TXT_R, screen_w / 2 + 40, SCORE_OFFSET_Y)
+  gfx.draw(TXT_L, screen_w / 2 - 60, SCORE_OFFSET_Y)
+  gfx.draw(TXT_R, screen_w / 2 + 40, SCORE_OFFSET_Y)
 end
 
 function draw_state_text()
   if S.state == "start" then
-    love.graphics.draw(TXT_START, screen_w / 2 - 40, screen_h / 2 - 16)
+    gfx.draw(TXT_START, screen_w / 2 - 40, screen_h / 2 - 16)
   elseif S.state == "gameover" then
-    love.graphics.draw(TXT_OVER, screen_w / 2 - 40, screen_h / 2 - 16)
+    gfx.draw(TXT_OVER, screen_w / 2 - 40, screen_h / 2 - 16)
   end
 end
 
@@ -347,7 +349,7 @@ function love.draw()
   -- assume size does not change during draw
   cache_dims()
   draw_bg()
-  love.graphics.draw(CENTER_CANVAS)
+  gfx.draw(CENTER_CANVAS)
   draw_paddle(S.player)
   draw_paddle(S.opp)
   draw_ball(S.ball)
