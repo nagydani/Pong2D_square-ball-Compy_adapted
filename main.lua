@@ -1,9 +1,7 @@
 -- main.lua
 
-
 require "constants"
 require "strategy"
-
 
 -- runtime configuration
 
@@ -12,7 +10,6 @@ FIXED_DT          = 1 / 60
 MAX_STEPS         = 5
 SPEED_SCALE       = 2.5
 MOUSE_SENSITIVITY = 1.0
-
 
 -- runtime variables
 
@@ -27,22 +24,37 @@ inited = false
 mouse_enabled = false
 time_t, acc = 0, 0
 
-
 -- game state
 
 S = {
-  player = { x = PADDLE_OFFSET_X, y = 0,
-    w = PADDLE_WIDTH, h = PADDLE_HEIGHT, dy = 0 },
-  opp = { x = 0, y = 0, w = PADDLE_WIDTH,
-    h = PADDLE_HEIGHT, dy = 0 },
-  ball = { x = 0, y = 0, dx = BALL_SPEED_X,
-    dy = BALL_SPEED_Y, size = BALL_SIZE },
-  playerScore = 0, oppScore = 0, state = "start"
+  player = {
+    x = PADDLE_OFFSET_X,
+    y = 0,
+    w = PADDLE_WIDTH,
+    h = PADDLE_HEIGHT,
+    dy = 0
+  },
+  opp = {
+    x = 0,
+    y = 0,
+    w = PADDLE_WIDTH,
+    h = PADDLE_HEIGHT,
+    dy = 0
+  },
+  ball = {
+    x = 0,
+    y = 0,
+    dx = BALL_SPEED_X,
+    dy = BALL_SPEED_Y,
+    size = BALL_SIZE
+  },
+  playerScore = 0,
+  oppScore = 0,
+  state = "start"
 }
 
 FONT, TXT_START, TXT_OVER, TXT_L, TXT_R = nil
 CENTER_CANVAS = nil
-
 
 -- screen helpers
 
@@ -74,7 +86,6 @@ function layout()
   S.ball.y = (screen_h - S.ball.size) / 2
 end
 
-
 -- canvas
 
 function draw_center_line()
@@ -97,7 +108,6 @@ function build_center_canvas()
   love.graphics.setCanvas()
 end
 
-
 -- text setup
 
 function build_static_texts()
@@ -112,7 +122,6 @@ function rebuild_score_texts()
   TXT_L = love.graphics.newText(FONT, tostring(S.playerScore))
   TXT_R = love.graphics.newText(FONT, tostring(S.oppScore))
 end
-
 
 -- initialization
 
@@ -132,7 +141,6 @@ end
 function ensure_init()
   if not inited then do_init() end
 end
-
 
 -- paddle and ball movement
 
@@ -168,7 +176,6 @@ function bounce_ball(b)
   end
 end
 
-
 -- collision and score
 
 function hit_offset(b, p)
@@ -190,11 +197,15 @@ function collide(b, p, off)
 end
 
 function scored(side)
-  if side == "opp" then S.oppScore = S.oppScore + 1
-  else S.playerScore = S.playerScore + 1 end
+  if side == "opp" then
+    S.oppScore = S.oppScore + 1
+  else
+    S.playerScore = S.playerScore + 1
+  end
   rebuild_score_texts()
-  if S.playerScore >= WIN_SCORE or S.oppScore >= WIN_SCORE then
-    S.state = "gameover"; return true
+  if WIN_SCORE <= S.playerScore or WIN_SCORE <= S.oppScore then
+    S.state = "gameover"
+    return true
   end
   return false
 end
@@ -228,13 +239,17 @@ end
 function love.keypressed(k)
   if k == "space" then
     if S.state == "start" then
-      S.state = "play"; reset_ball()
+      S.state = "play"
+      reset_ball()
     elseif S.state == "gameover" then
       S.playerScore, S.oppScore = 0, 0
       rebuild_score_texts()
-      layout(); S.state = "start"
+      layout()
+      S.state = "start"
     end
-  elseif k == "escape" then love.event.quit() end
+  elseif k == "escape" then
+    love.event.quit()
+  end
 end
 
 function update_player(dt)
@@ -259,7 +274,9 @@ end
 -- main step/update
 
 function step_game(dt)
-  if S.state ~= "play" then return end
+  if S.state ~= "play" then
+    return 
+  end
   local sdt = dt * SPEED_SCALE
   update_player(sdt)
   strategy.update(S, sdt)
@@ -267,8 +284,10 @@ function step_game(dt)
   bounce_ball(S.ball)
   collide(S.ball, S.player, S.player.w)
   collide(S.ball, S.opp, -S.ball.size)
-  if check_score() then return end
-  if S.ball.x < 0 or S.ball.x + S.ball.size > screen_w then
+  if check_score() then
+    return 
+  end
+  if S.ball.x < 0 or screen_w < S.ball.x + S.ball.size then
     reset_ball()
   end
 end
@@ -291,7 +310,6 @@ function love.update(dt)
   if USE_FIXED then update_fixed(rdt)
   else step_game(rdt) end
 end
-
 
 -- drawing
 
