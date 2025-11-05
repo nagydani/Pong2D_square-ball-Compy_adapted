@@ -353,12 +353,10 @@ end
 
 function draw_state_text()
   if S.state == "start" then
-    gfx.draw(TXT_START, screen_w / 2 - 40, screen_h / 2 - 16)
-  
-      elseif S.state == "gameover" then
+    gfx.draw(TXT_START, screen_w / 2 - 40, screen_h / 2 - 16) 
+  elseif S.state == "gameover" then
     gfx.draw(TXT_OVER, screen_w / 2 - 40, screen_h / 2 - 16)
-  
-      end
+  end
 end
 
 function love.draw()
