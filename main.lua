@@ -26,32 +26,32 @@ time_t, acc = 0, 0
 
 -- game state
 
-S = {
-  player = {
-    x = PADDLE_OFFSET_X,
-    y = 0,
-    w = PADDLE_WIDTH,
-    h = PADDLE_HEIGHT,
-    dy = 0
-  },
-  opp = {
-    x = 0,
-    y = 0,
-    w = PADDLE_WIDTH,
-    h = PADDLE_HEIGHT,
-    dy = 0
-  },
-  ball = {
-    x = 0,
-    y = 0,
-    dx = BALL_SPEED_X,
-    dy = BALL_SPEED_Y,
-    size = BALL_SIZE
-  },
-  playerScore = 0,
-  oppScore = 0,
-  state = "start"
+S = {}
+
+S.player = {
+  x = PADDLE_OFFSET_X,
+  y = 0,
+  w = PADDLE_WIDTH,
+  h = PADDLE_HEIGHT,
+  dy = 0
 }
+S.opp = {
+  x = 0,
+  y = 0,
+  w = PADDLE_WIDTH,
+  h = PADDLE_HEIGHT,
+  dy = 0
+}
+S.ball = {
+  x = 0,
+  y = 0,
+  dx = BALL_SPEED_X,
+  dy = BALL_SPEED_Y,
+  size = BALL_SIZE
+}
+S.playerScore = 0
+S.oppScore = 0
+S.state = "start"
 
 FONT, TXT_START, TXT_OVER, TXT_L, TXT_R = nil
 CENTER_CANVAS = nil
@@ -170,9 +170,13 @@ function move_ball(b, dt)
 end
 
 function bounce_ball(b)
-  if b.y < 0 then b.y = 0; b.dy = -b.dy end
-  if b.y > ball_max_y then
-    b.y = ball_max_y; b.dy = -b.dy
+  if b.y < 0 then
+    b.y = 0
+    b.dy = -b.dy
+  end
+  if ball_max_y < b.y then
+    b.y = ball_max_y
+    b.dy = -b.dy
   end
 end
 
@@ -352,5 +356,7 @@ function love.draw()
 end
 
 function love.resize()
-  cache_dims(); layout(); build_center_canvas()
+  cache_dims()
+  layout()
+  build_center_canvas()
 end
