@@ -28,7 +28,7 @@ time_t, acc = 0, 0
 
 -- game state
 
-S = {}
+S = { }
 
 S.player = {
   x = PADDLE_OFFSET_X,
@@ -54,7 +54,7 @@ S.state = "start"
 
 -- ui resources
 font = nil
-texts = {}
+texts = { }
 center_canvas = nil
 
 -- screen helpers
@@ -81,7 +81,6 @@ function layout()
   S.opp.y = (VIRTUAL_H - PADDLE_HEIGHT) / 2
   S.ball.x = (VIRTUAL_W - BALL_SIZE) / 2
   S.ball.y = (VIRTUAL_H - BALL_SIZE) / 2
-
   paddle_max_y = VIRTUAL_H - PADDLE_HEIGHT
   ball_max_y = VIRTUAL_H - BALL_SIZE
 end
@@ -114,7 +113,9 @@ function draw_center_line()
 end
 
 function build_center_canvas()
-  if center_canvas then center_canvas:release() end
+  if center_canvas then
+    center_canvas:release()
+  end
   center_canvas = gfx.newCanvas(VIRTUAL_W, VIRTUAL_H)
   gfx.setCanvas(center_canvas)
   gfx.clear(0, 0, 0, 0)
@@ -133,9 +134,9 @@ function build_static_texts()
 end
 
 function do_init()
-  cache_dims()          
-  layout()              
-  build_center_canvas() 
+  cache_dims()
+  layout()
+  build_center_canvas()
   build_static_texts()
   mouse_enabled = true
   time_t = love.timer.getTime()
@@ -155,7 +156,7 @@ function clamp_paddle(p)
   if p.y < 0 then
     p.y = 0
   end
-  if p.y + PADDLE_HEIGHT > VIRTUAL_H then
+  if VIRTUAL_H < p.y + PADDLE_HEIGHT then
     p.y = VIRTUAL_H - PADDLE_HEIGHT
   end
 end
@@ -179,7 +180,8 @@ end
 function move_ball(b, dt)
   b.x = b.x + b.dx * dt
   b.y = b.y + b.dy * dt
-  if b.y < 0 then b.y = 0
+  if b.y < 0 then
+    b.y = 0
     b.dy = -b.dy
   end
   if VIRTUAL_H < b.y + BALL_SIZE then
@@ -245,9 +247,9 @@ end
 -- control and update
 
 key_actions = {
-  start = {},
-  play = {},
-  gameover = {}
+  start = { },
+  play = { },
+  gameover = { }
 }
 
 function key_actions.start.space()
@@ -257,7 +259,7 @@ function key_actions.start.space()
 end
 
 function key_actions.play.space()
-  -- reserved
+  
 end
 
 function key_actions.gameover.space()
@@ -296,11 +298,10 @@ function update_player(dt)
 end
 
 function love.mousemoved(x, y, dx, dy, t)
-  if not mouse_enabled
-     or t
-     or S.state ~= "play"
+  if not mouse_enabled or t
+       or S.state ~= "play"
   then
-    return
+    return 
   end
   local p = S.player
   p.y = p.y + dy * MOUSE_SENSITIVITY
@@ -328,14 +329,14 @@ end
 
 function step_game(dt)
   if S.state ~= "play" then
-    return
+    return 
   end
   local sdt = dt * SPEED_SCALE
   update_player(sdt)
   strategy.update(S, sdt)
   step_ball(S.ball, sdt)
   if handle_score() then
-    return
+    return 
   end
 end
 
@@ -354,7 +355,8 @@ function love.update(dt)
   local now = love.timer.getTime()
   local rdt = now - time_t
   time_t = now
-  if USE_FIXED then update_fixed(rdt)
+  if USE_FIXED then
+    update_fixed(rdt)
   else
     step_game(rdt)
   end
@@ -381,7 +383,10 @@ function draw_scores()
 end
 
 function draw_state_text(s)
-  local state_text = {start = texts.start, gameover = texts.over}
+  local state_text = {
+    start = texts.start,
+    gameover = texts.over
+  }
   local t = state_text[s]
   if t then
     gfx.draw(t, VIRTUAL_W / 2 - 40, VIRTUAL_H / 2 - 16)
