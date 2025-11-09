@@ -23,7 +23,7 @@ local function opp_manual(S, dt)
     dir = -1
   elseif love.keyboard.isDown("down") then
     dir = 1
-  end
+  end 
   move_paddle(S.opp, dir, dt)
 end
 

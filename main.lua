@@ -52,8 +52,11 @@ S.score = {
 }
 S.state = "start"
 
-FONT, TXT_START, TXT_OVER, TXT_L, TXT_R = nil
-CENTER_CANVAS = nil
+-- ui resources
+
+font = nil
+texts = {}
+center_canvas = nil
 
 -- screen helpers
 
@@ -80,6 +83,29 @@ function layout()
   S.ball.y = (screen_h - ball_size) / 2
 end
 
+-- text helpers
+
+function set_text(name, str)
+  local old = texts[name]
+  if old then
+    old:release()
+  end
+  texts[name] = gfx.newText(
+    font, str
+  )
+end
+
+function rebuild_score_texts()
+  set_text(
+    "score_l",
+    tostring(S.score.player)
+  )
+  set_text(
+    "score_r",
+    tostring(S.score.opp)
+  )
+end
+
 -- canvas
 
 function draw_center_line()
@@ -93,44 +119,32 @@ function draw_center_line()
 end
 
 function build_center_canvas()
-  if CENTER_CANVAS then
-    CENTER_CANVAS:release()
+  if center_canvas then
+    center_canvas:release()
   end
-  CENTER_CANVAS = gfx.newCanvas(screen_w, screen_h)
-  gfx.setCanvas(CENTER_CANVAS)
+  center_canvas =
+    gfx.newCanvas(screen_w, screen_h)
+  gfx.setCanvas(center_canvas)
   gfx.clear(0, 0, 0, 0)
   gfx.setColor(COLOR_FG)
   draw_center_line()
   gfx.setCanvas()
 end
 
--- text setup
+-- initialization
 
 function build_static_texts()
-  FONT = gfx.getFont()
-  TXT_START = gfx.newText(FONT, "Press Space")
-  TXT_OVER = gfx.newText(FONT, "Game Over")
+  font = gfx.getFont()
+  set_text("start", "Press Space")
+  set_text("over", "Game Over")
+  rebuild_score_texts()
 end
-
-function rebuild_score_texts()
-  if TXT_L then
-    TXT_L:release()
-  end
-  if TXT_R then
-    TXT_R:release()
-  end
-  TXT_L = gfx.newText(FONT, tostring(S.score.player))
-  TXT_R = gfx.newText(FONT, tostring(S.score.opp))
-end
-
--- initialization
 
 function do_init()
   cache_dims()
   layout()
   build_center_canvas()
   build_static_texts()
-  rebuild_score_texts()
   mouse_enabled = true
   time_t = love.timer.getTime()
   inited = true
@@ -247,7 +261,7 @@ end
 
 -- reserve for future pause or ignore
 function key_actions.play.space()
-
+  
 end
 
 function key_actions.gameover.space()
@@ -259,14 +273,14 @@ function key_actions.gameover.space()
   love.mouse.setRelativeMode(false)
 end
 
-for i in pairs(key_actions) do
-  key_actions[i].escape = love.event.quit
+for name in pairs(key_actions) do
+  key_actions[name].escape = love.event.quit
 end
 
 function love.keypressed(k)
-  local s = key_actions[S.state]
-  if s[k] then
-    s[k]()
+  local group = key_actions[S.state]
+  if group and group[k] then
+    group[k]()
   end
 end
 
@@ -287,9 +301,9 @@ end
 
 function love.mousemoved(x, y, dx, dy, t)
   if not mouse_enabled or t
-       or S.state ~= "play"
+     or S.state ~= "play"
   then
-    return 
+    return
   end
   local p = S.player
   p.y = p.y + dy * MOUSE_SENSITIVITY
@@ -316,7 +330,7 @@ function handle_score()
 end
 
 function step_game(dt)
-  if S.state ~= "play"
+  if S.state ~= "play" 
   then
     return
   end
@@ -324,7 +338,7 @@ function step_game(dt)
   update_player(sdt)
   strategy.update(S, sdt)
   step_ball(S.ball, sdt)
-  if handle_score()
+  if handle_score() 
   then
     return
   end
@@ -345,7 +359,7 @@ function love.update(dt)
   local now = love.timer.getTime()
   local rdt = now - time_t
   time_t = now
-  if USE_FIXED then
+  if USE_FIXED then 
     update_fixed(rdt)
   else
     step_game(rdt)
@@ -368,29 +382,26 @@ function draw_ball(b)
 end
 
 function draw_scores()
-  gfx.draw(TXT_L, screen_w / 2 - 60, SCORE_OFFSET_Y)
-  gfx.draw(TXT_R, screen_w / 2 + 40, SCORE_OFFSET_Y)
+  gfx.draw(texts.score_l, screen_w / 2 - 60, SCORE_OFFSET_Y)
+  gfx.draw(texts.score_r, screen_w / 2 + 40, SCORE_OFFSET_Y)
 end
 
 function draw_state_text(s)
   local state_text = {
-    start = TXT_START,
-    gameover = TXT_OVER
+    start = texts.start,
+    gameover = texts.over
   }
-  if state_text[s] then
-    gfx.draw(
-      state_text[s],
-      screen_w / 2 - 40,
-      screen_h / 2 - 16
-    )
+
+  local t = state_text[s]
+  if t then
+    gfx.draw (t, screen_w / 2 - 40, screen_h / 2 - 16)
   end
 end
 
 function love.draw()
-  -- assume size does not change during draw
   cache_dims()
   draw_bg()
-  gfx.draw(CENTER_CANVAS)
+  gfx.draw(center_canvas)
   draw_paddle(S.player)
   draw_paddle(S.opp)
   draw_ball(S.ball)
