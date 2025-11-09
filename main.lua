@@ -96,14 +96,8 @@ function set_text(name, str)
 end
 
 function rebuild_score_texts()
-  set_text(
-    "score_l",
-    tostring(S.score.player)
-  )
-  set_text(
-    "score_r",
-    tostring(S.score.opp)
-  )
+  set_text("score_l", tostring(S.score.player))
+  set_text("score_r", tostring(S.score.opp))
 end
 
 -- canvas
