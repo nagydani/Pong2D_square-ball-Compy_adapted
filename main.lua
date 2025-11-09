@@ -5,22 +5,22 @@ require "strategy"
 
 gfx = love.graphics
 
--- runtime configuration
+-- virtual game space
+VIRTUAL_W = 640
+VIRTUAL_H = 480
 
+-- runtime configuration
 USE_FIXED = true
 FIXED_DT = 1 / 60
 MAX_STEPS = 5
-SPEED_SCALE = 2.5
+SPEED_SCALE = 1.5
 MOUSE_SENSITIVITY = 1
 
 -- runtime variables
-
+view_tf = nil
 screen_w, screen_h = 0, 0
-paddle_max_y, ball_max_y = 0, 0
-center_x = 0
-paddle_w = 0
-paddle_h = 0
-ball_size = 0
+paddle_max_y = 0
+ball_max_y = 0
 
 inited = false
 mouse_enabled = false
@@ -44,7 +44,7 @@ S.ball = {
   x = 0,
   y = 0,
   dx = BALL_SPEED_X,
-  dy = BALL_SPEED_Y,
+  dy = BALL_SPEED_Y
 }
 S.score = {
   player = 0,
@@ -53,34 +53,37 @@ S.score = {
 S.state = "start"
 
 -- ui resources
-
 font = nil
 texts = {}
 center_canvas = nil
 
 -- screen helpers
 
+function update_view_transform(w, h)
+  screen_w = w
+  screen_h = h
+  local sx = w / VIRTUAL_W
+  local sy = h / VIRTUAL_H
+  view_tf = love.math.newTransform()
+  view_tf:scale(sx, sy)
+end
+
 function cache_dims()
-  screen_w = gfx.getWidth()
-  screen_h = gfx.getHeight()
-  -- scale: convert proportional constants to real pixels
-  local base_h = 480
-  local scale = screen_h / base_h
-  paddle_w = math.floor(PADDLE_WIDTH * scale + 0.5)
-  paddle_h = math.floor(PADDLE_HEIGHT * scale + 0.5)
-  ball_size = math.floor(BALL_SIZE * scale + 0.5)
-  paddle_max_y = screen_h - paddle_h
-  ball_max_y = screen_h - ball_size
-  center_x = math.floor(screen_w / 2 + 0.5)
+  local w = gfx.getWidth()
+  local h = gfx.getHeight()
+  update_view_transform(w, h)
 end
 
 function layout()
-  -- apply scaled sizes to state
-  S.player.y = (screen_h - paddle_h) / 2
-  S.opp.x = (screen_w - PADDLE_OFFSET_X) - paddle_w
-  S.opp.y = (screen_h - paddle_h) / 2
-  S.ball.x = (screen_w - ball_size) / 2
-  S.ball.y = (screen_h - ball_size) / 2
+  S.player.x = PADDLE_OFFSET_X
+  S.player.y = (VIRTUAL_H - PADDLE_HEIGHT) / 2
+  S.opp.x = (VIRTUAL_W - PADDLE_OFFSET_X) - PADDLE_WIDTH
+  S.opp.y = (VIRTUAL_H - PADDLE_HEIGHT) / 2
+  S.ball.x = (VIRTUAL_W - BALL_SIZE) / 2
+  S.ball.y = (VIRTUAL_H - BALL_SIZE) / 2
+
+  paddle_max_y = VIRTUAL_H - PADDLE_HEIGHT
+  ball_max_y = VIRTUAL_H - BALL_SIZE
 end
 
 -- text helpers
@@ -90,9 +93,7 @@ function set_text(name, str)
   if old then
     old:release()
   end
-  texts[name] = gfx.newText(
-    font, str
-  )
+  texts[name] = gfx.newText(font, str)
 end
 
 function rebuild_score_texts()
@@ -100,24 +101,21 @@ function rebuild_score_texts()
   set_text("score_r", tostring(S.score.opp))
 end
 
--- canvas
+-- canvas 
 
 function draw_center_line()
-  local x = center_x - 2
-  local step = ball_size * 2
+  local x = VIRTUAL_W / 2 - 2
+  local step = BALL_SIZE * 2
   local y = 0
-  while y < screen_h do
-    gfx.rectangle("fill", x, y, 4, ball_size)
+  while y < VIRTUAL_H do
+    gfx.rectangle("fill", x, y, 4, BALL_SIZE)
     y = y + step
   end
 end
 
 function build_center_canvas()
-  if center_canvas then
-    center_canvas:release()
-  end
-  center_canvas =
-    gfx.newCanvas(screen_w, screen_h)
+  if center_canvas then center_canvas:release() end
+  center_canvas = gfx.newCanvas(VIRTUAL_W, VIRTUAL_H)
   gfx.setCanvas(center_canvas)
   gfx.clear(0, 0, 0, 0)
   gfx.setColor(COLOR_FG)
@@ -135,9 +133,9 @@ function build_static_texts()
 end
 
 function do_init()
-  cache_dims()
-  layout()
-  build_center_canvas()
+  cache_dims()          
+  layout()              
+  build_center_canvas() 
   build_static_texts()
   mouse_enabled = true
   time_t = love.timer.getTime()
@@ -146,14 +144,20 @@ function do_init()
 end
 
 function ensure_init()
-  if not inited then do_init() end
+  if not inited then
+    do_init()
+  end
 end
 
 -- paddle and ball movement
 
 function clamp_paddle(p)
-  if p.y < 0 then p.y = 0 end
-  if p.y > paddle_max_y then p.y = paddle_max_y end
+  if p.y < 0 then
+    p.y = 0
+  end
+  if p.y + PADDLE_HEIGHT > VIRTUAL_H then
+    p.y = VIRTUAL_H - PADDLE_HEIGHT
+  end
 end
 
 function move_paddle(p, dir, dt)
@@ -166,7 +170,7 @@ function check_scored(bx)
   if bx < 0 then
     return "opp"
   end
-  if screen_w < bx + ball_size then
+  if VIRTUAL_W < bx + BALL_SIZE then
     return "player"
   end
   return nil
@@ -175,12 +179,11 @@ end
 function move_ball(b, dt)
   b.x = b.x + b.dx * dt
   b.y = b.y + b.dy * dt
-  if b.y < 0 then
-    b.y = 0
+  if b.y < 0 then b.y = 0
     b.dy = -b.dy
   end
-  if screen_h < b.y + ball_size then
-    b.y = screen_h - ball_size
+  if VIRTUAL_H < b.y + BALL_SIZE then
+    b.y = VIRTUAL_H - BALL_SIZE
     b.dy = -b.dy
   end
   return check_scored(b.x)
@@ -200,16 +203,16 @@ end
 -- collision and score
 
 function hit_offset(b, p)
-  local pc = p.y + paddle_h / 2
-  local bc = b.y + ball_size / 2
-  return (bc - pc) / (paddle_h / 2)
+  local pc = p.y + PADDLE_HEIGHT / 2
+  local bc = b.y + BALL_SIZE / 2
+  return (bc - pc) / (PADDLE_HEIGHT / 2)
 end
 
 function collide(b, p, off)
-  local hx1 = b.x < p.x + paddle_w
-  local hx2 = p.x < b.x + ball_size
-  local hy1 = b.y < p.y + paddle_h
-  local hy2 = p.y < b.y + ball_size
+  local hx1 = b.x < p.x + PADDLE_WIDTH
+  local hx2 = p.x < b.x + BALL_SIZE
+  local hy1 = b.y < p.y + PADDLE_HEIGHT
+  local hy2 = p.y < b.y + BALL_SIZE
   if hx1 and hx2 and hy1 and hy2 then
     b.x = p.x + off
     b.dx = -b.dx
@@ -231,20 +234,20 @@ end
 
 function reset_ball()
   local b = S.ball
-  b.x = (screen_w - ball_size) / 2
-  b.y = (screen_h - ball_size) / 2
-  local s = S.score.player + S.score.opp
-  local dir = (s % 2 == 0) and 1 or -1
+  b.x = (VIRTUAL_W - BALL_SIZE) / 2
+  b.y = (VIRTUAL_H - BALL_SIZE) / 2
+  local total = S.score.player + S.score.opp
+  local dir = (total % 2 == 0) and 1 or -1
   b.dx = dir * BALL_SPEED_X
-  b.dy = ((s % 3 - 1) * BALL_SPEED_Y) * 0.3
+  b.dy = ((total % 3 - 1) * BALL_SPEED_Y) * 0.3
 end
 
 -- control and update
 
 key_actions = {
-  start = { },
-  play = { },
-  gameover = { }
+  start = {},
+  play = {},
+  gameover = {}
 }
 
 function key_actions.start.space()
@@ -253,9 +256,8 @@ function key_actions.start.space()
   reset_ball()
 end
 
--- reserve for future pause or ignore
 function key_actions.play.space()
-  
+  -- reserved
 end
 
 function key_actions.gameover.space()
@@ -294,7 +296,8 @@ function update_player(dt)
 end
 
 function love.mousemoved(x, y, dx, dy, t)
-  if not mouse_enabled or t
+  if not mouse_enabled
+     or t
      or S.state ~= "play"
   then
     return
@@ -309,8 +312,8 @@ end
 function step_ball(b, dt)
   move_ball(b, dt)
   bounce_ball(b)
-  collide(b, S.player, paddle_w)
-  collide(b, S.opp, -ball_size)
+  collide(b, S.player, PADDLE_WIDTH)
+  collide(b, S.opp, -BALL_SIZE)
 end
 
 function handle_score()
@@ -324,16 +327,14 @@ function handle_score()
 end
 
 function step_game(dt)
-  if S.state ~= "play" 
-  then
+  if S.state ~= "play" then
     return
   end
   local sdt = dt * SPEED_SCALE
   update_player(sdt)
   strategy.update(S, sdt)
   step_ball(S.ball, sdt)
-  if handle_score() 
-  then
+  if handle_score() then
     return
   end
 end
@@ -353,8 +354,7 @@ function love.update(dt)
   local now = love.timer.getTime()
   local rdt = now - time_t
   time_t = now
-  if USE_FIXED then 
-    update_fixed(rdt)
+  if USE_FIXED then update_fixed(rdt)
   else
     step_game(rdt)
   end
@@ -368,43 +368,40 @@ function draw_bg()
 end
 
 function draw_paddle(p)
-  gfx.rectangle("fill", p.x, p.y, paddle_w, paddle_h)
+  gfx.rectangle("fill", p.x, p.y, PADDLE_WIDTH, PADDLE_HEIGHT)
 end
 
 function draw_ball(b)
-  gfx.rectangle("fill", b.x, b.y, ball_size, ball_size)
+  gfx.rectangle("fill", b.x, b.y, BALL_SIZE, BALL_SIZE)
 end
 
 function draw_scores()
-  gfx.draw(texts.score_l, screen_w / 2 - 60, SCORE_OFFSET_Y)
-  gfx.draw(texts.score_r, screen_w / 2 + 40, SCORE_OFFSET_Y)
+  gfx.draw(texts.score_l, VIRTUAL_W / 2 - 60, SCORE_OFFSET_Y)
+  gfx.draw(texts.score_r, VIRTUAL_W / 2 + 40, SCORE_OFFSET_Y)
 end
 
 function draw_state_text(s)
-  local state_text = {
-    start = texts.start,
-    gameover = texts.over
-  }
-
+  local state_text = {start = texts.start, gameover = texts.over}
   local t = state_text[s]
   if t then
-    gfx.draw (t, screen_w / 2 - 40, screen_h / 2 - 16)
+    gfx.draw(t, VIRTUAL_W / 2 - 40, VIRTUAL_H / 2 - 16)
   end
 end
 
 function love.draw()
-  cache_dims()
   draw_bg()
+  gfx.push()
+  gfx.applyTransform(view_tf)
   gfx.draw(center_canvas)
   draw_paddle(S.player)
   draw_paddle(S.opp)
   draw_ball(S.ball)
   draw_scores()
   draw_state_text(S.state)
+  gfx.pop()
 end
 
-function love.resize()
-  cache_dims()
-  layout()
+function love.resize(w, h)
+  update_view_transform(w, h)
   build_center_canvas()
 end
