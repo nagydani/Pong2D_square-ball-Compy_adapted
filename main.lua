@@ -258,6 +258,18 @@ function key_actions.start.space()
   reset_ball()
 end
 
+function key_actions.start.e()
+  opponent = easy
+end
+
+function key_actions.start.h()
+  opponent = hard
+end
+
+key_actions.start["2"] = function()
+  opponent = manual
+end
+
 function key_actions.play.space()
   
 end
