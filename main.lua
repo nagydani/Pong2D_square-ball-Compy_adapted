@@ -52,11 +52,6 @@ S.score = {
 }
 S.state = "start"
 
-S.mode = {
-  players = 1,
-  difficulty = "hard"
-}
-
 -- ui resources
 font = nil
 texts = { }
@@ -257,27 +252,6 @@ key_actions = {
   gameover = { }
 }
 
-key_actions.start["1"] = function()
-  S.mode.players = 2
-  strategy.set_opp_mode("manual")
-end
-
-key_actions.start["2"] = function()
-  S.mode.players = 1
-  strategy.set_opp_mode("ai")
-  strategy.set_difficulty(S.mode.difficulty)
-end
-
-key_actions.start.e = function()
-  S.mode.difficulty = "easy"
-  strategy.set_difficulty("easy")
-end
-
-key_actions.start.h = function()
-  S.mode.difficulty = "hard"
-  strategy.set_difficulty("hard")
-end
-
 function key_actions.start.space()
   S.state = "play"
   love.mouse.setRelativeMode(true)
@@ -403,16 +377,9 @@ function draw_ball(b)
   gfx.rectangle("fill", b.x, b.y, BALL_SIZE, BALL_SIZE)
 end
 
-local function draw_start_menu()
-  gfx.print("1: two players",
-    VIRTUAL_W / 2 - 80,
-    VIRTUAL_H / 2 + 10)
-  gfx.print("2: vs AI (" .. S.mode.difficulty .. ")",
-    VIRTUAL_W / 2 - 80,
-    VIRTUAL_H / 2 + 26)
-  gfx.print("E/H: AI difficulty",
-    VIRTUAL_W / 2 - 80,
-    VIRTUAL_H / 2 + 42)
+function draw_scores()
+  gfx.draw(texts.score_l, VIRTUAL_W / 2 - 60, SCORE_OFFSET_Y)
+  gfx.draw(texts.score_r, VIRTUAL_W / 2 + 40, SCORE_OFFSET_Y)
 end
 
 function draw_state_text(s)
@@ -424,14 +391,6 @@ function draw_state_text(s)
   if t then
     gfx.draw(t, VIRTUAL_W / 2 - 40, VIRTUAL_H / 2 - 16)
   end
-  if s == "start" then
-    draw_start_menu()
-  end
-end
-
-function draw_scores()
-  gfx.draw(texts.score_l, VIRTUAL_W / 2 - 60, SCORE_OFFSET_Y)
-  gfx.draw(texts.score_r, VIRTUAL_W / 2 + 40, SCORE_OFFSET_Y)
 end
 
 function love.draw()
