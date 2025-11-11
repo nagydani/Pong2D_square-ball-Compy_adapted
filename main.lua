@@ -100,6 +100,12 @@ function rebuild_score_texts()
   set_text("score_r", tostring(S.score.opp))
 end
 
+function rebuild_opp_texts()
+  set_text("easy", "1 Player (easy)")
+  set_text("hard", "1 Player (hard)")
+  set_text("manual", "2 Players (keyboard)")
+end
+
 -- canvas 
 
 function draw_center_line()
@@ -128,9 +134,15 @@ end
 
 function build_static_texts()
   font = gfx.getFont()
-  set_text("start", "Press Space")
+  set_text("start", "Press Space to Start")
   set_text("gameover", "Game Over")
+  rebuild_opp_texts()
   rebuild_score_texts()
+end
+
+function set_strategy(s)
+  opponent = strategy[s]
+  opp_text = texts[s]
 end
 
 function do_init()
@@ -141,7 +153,7 @@ function do_init()
   mouse_enabled = true
   time_t = love.timer.getTime()
   inited = true
-  opponent = hard
+  set_strategy("hard")
 end
 
 function ensure_init()
@@ -259,28 +271,28 @@ function key_actions.start.space()
 end
 
 function key_actions.start.e()
-  opponent = easy
+  set_strategy("easy")
 end
 
 function key_actions.start.h()
-  opponent = hard
+  set_strategy("hard")
 end
 
 key_actions.start["1"] = function()
-  if opponent ~= easy then
-    opponent = hard
+  if opponent ~= strategy.easy then
+    set_strategy("hard")
   end
 end
 
 key_actions.start["2"] = function()
-  opponent = manual
+  set_strategy("manual")
 end
 
 function key_actions.play.space()
   
 end
 
-function key_actions.gameover.space()
+function key_actions.play.r()
   S.score.player = 0
   S.score.opp = 0
   rebuild_score_texts()
@@ -288,6 +300,8 @@ function key_actions.gameover.space()
   S.state = "start"
   love.mouse.setRelativeMode(false)
 end
+
+key_actions.gameover.space = key_actions.play.r
 
 for name in pairs(key_actions) do
   key_actions[name].escape = love.event.quit
@@ -402,6 +416,9 @@ function draw_state_text(s)
   local t = texts[s]
   if t then
     gfx.draw(t, VIRTUAL_W / 2 - 40, VIRTUAL_H / 2 - 16)
+  end
+  if s == "start" then
+    gfx.draw(opp_text, VIRTUAL_W / 2 - 40, VIRTUAL_H / 2)
   end
 end
 
