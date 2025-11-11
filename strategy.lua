@@ -79,9 +79,3 @@ function strategy.set_opp_strategy(name, fn)
     strategy.current = fn
   end
 end
-
-function strategy.update(S, dt)
-  if strategy.current then
-    strategy.current(S, dt)
-  end
-end

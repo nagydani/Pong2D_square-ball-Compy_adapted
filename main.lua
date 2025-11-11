@@ -332,12 +332,13 @@ function step_game(dt)
     return 
   end
   local sdt = dt * SPEED_SCALE
+  local current = strategy.current
   update_player(sdt)
-  strategy.update(S, sdt)
-  step_ball(S.ball, sdt)
-  if handle_score() then
-    return 
+  if current then
+    current(S, sdt)
   end
+  step_ball(S.ball, sdt)
+  handle_score()
 end
 
 function update_fixed(rdt)
