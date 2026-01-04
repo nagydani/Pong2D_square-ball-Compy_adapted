@@ -46,10 +46,7 @@ end
 
 -- 1. TIME CALCULATION
 
-function validate_time(t, dt)
-  if t < 0 and -dt <= t then
-    return 0
-  end
+function check_time(t, dt)
   if 0 <= t and t <= dt then
     return t
   end
@@ -60,7 +57,7 @@ end
 
 function calc_time(dist, v, dt)
   local t = dist / v
-  return (0 <= t and t <= dt) and t or nil
+  return check_time(t, dt)
 end
 
 -- Solves geometry intersection (Corner)
@@ -78,7 +75,7 @@ function calc_circ_time(d, v, r, dt)
     return nil
   end
   local t = (proj - math.sqrt(disc)) / v2
-  return validate_time(t, dt)
+  return check_time(t, dt)
 end
 
 -- 2. AXIS LOGIC
