@@ -235,10 +235,13 @@ function process_input(dt)
   end
 end
 
-function update_pads(dt)
+function update_pads_input(dt)
   GS.player.vel.x, GS.player.vel.y = 0, 0
   process_input(dt)
   GS.ai(GS.opponent, GS.ball, dt)
+end
+
+function move_pads(dt)
   for _, p in ipairs(GS.paddles) do
     integrate_position(p.pos, p.vel, dt)
     constrain(p)
@@ -308,14 +311,12 @@ function process_win(win, now)
 end
 
 function check_score(now)
-  local x = GS.ball.pos.x
+  local x, r = GS.ball.pos.x, GS.ball.radius
   local win = nil
-  local p_limit = LIMITS.player.min + GS.player.size.x
-  if x < LIMITS.player.min then
+  if x + r < 0 then
     win = "opponent"
   end
-  local o_limit = LIMITS.opp.max
-  if LIMITS.opp.max + GS.opponent.size.x < x then
+  if GAME.width < x - r then
     win = "player"
   end
   if win then
@@ -441,8 +442,9 @@ function love.update(dt)
     return 
   end
   local now = timer.getTime()
-  update_pads(dt)
+  update_pads_input(dt)
   update_ball(dt, now)
+  move_pads(dt)
 end
 
 function love.draw()

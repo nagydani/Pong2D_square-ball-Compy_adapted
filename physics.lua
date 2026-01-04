@@ -46,6 +46,16 @@ end
 
 -- 1. TIME CALCULATION
 
+function validate_time(t, dt)
+  if t < 0 and -dt <= t then
+    return 0
+  end
+  if 0 <= t and t <= dt then
+    return t
+  end
+  return nil
+end
+
 -- Solves linear intersection (Wall/SIde)
 
 function calc_time(dist, v, dt)
@@ -55,19 +65,20 @@ end
 
 -- Solves geometry intersection (Corner)
 
-function calc_circ_time(dx, dy, v, r)
+function calc_circ_time(d, v, r, dt)
   local v2 = v.x * v.x + v.y * v.y
-  local perp = v.x * dy - v.y * dx
+  local perp = v.x * d.y - v.y * d.x
   local r2v2 = r * r * v2
   if r2v2 < perp * perp then
     return nil
   end
-  local proj = dx * v.x + dy * v.y
+  local proj = d.x * v.x + d.y * v.y
   local disc = r2v2 - perp * perp
   if disc < 0 then
     return nil
   end
-  return (proj - math.sqrt(disc)) / v2
+  local t = (proj - math.sqrt(disc)) / v2
+  return validate_time(t, dt)
 end
 
 -- 2. AXIS LOGIC
@@ -158,8 +169,8 @@ end
 function collide_corner(ball, pad, corner, dt)
   D_VEC.x = corner.x - ball.pos.x
   D_VEC.y = corner.y - ball.pos.y
-  local t = calc_circ_time(D_VEC.x, D_VEC.y, V_REL, ball.radius)
-  if t and 0 <= t and t <= dt then
+  local t = calc_circ_time(D_VEC, V_REL, ball.radius, dt)
+  if t then
     local bx = ball.pos.x + V_REL.x * t
     local by = ball.pos.y + V_REL.y * t
     local inv_r = 1 / ball.radius
