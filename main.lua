@@ -35,7 +35,7 @@ GS.mouse = {
   x = 0,
   y = 0
 }
-GS.ai = strategy.ai
+GS.ai = strategy.hard
 
 -- Entities (Unified Vectors: pos, vel, size)
 
@@ -147,11 +147,11 @@ function reset_ball_pos(serve_vector)
 end
 
 function get_strat_name()
-  if GS.input == "keyboard" then
-    return "2 Players (Manual)"
+  if GS.ai == strategy.manual then 
+    return "2 Players (Manual)" 
   end
-  if GS.opponent.speed == AI.speed_easy then
-    return "1 Player (Easy)"
+  if GS.ai == strategy.easy then 
+    return "1 Player (Easy)" 
   end
   return "1 Player (Hard)"
 end
@@ -308,12 +308,14 @@ function process_win(win, now)
 end
 
 function check_score(now)
-  local x, r = GS.ball.pos.x, GS.ball.radius
+  local x = GS.ball.pos.x
   local win = nil
-  if x + r < 0 then
+  local p_limit = LIMITS.player.min + GS.player.size.x
+  if x < LIMITS.player.min then
     win = "opponent"
   end
-  if GAME.width < x - r then
+  local o_limit = LIMITS.opp.max
+  if LIMITS.opp.max + GS.opponent.size.x < x then
     win = "player"
   end
   if win then
@@ -324,7 +326,7 @@ end
 function update_ball(dt, now)
   local t_sim = now - dt
   sync_phys(t_sim)
-  local col = select_hit_paddle(dt) 
+  local col = select_hit_paddle(dt)
   if col.time then
     process_collision(col, t_sim)
   end
@@ -349,25 +351,25 @@ function actions.start.space()
 end
 
 actions.start["1"] = function()
-  GS.ai = strategy.ai
   GS.input = "mouse"
-  local is_hard = (GS.opponent.speed == AI.speed_hard)
-  GS.opponent.speed = is_hard and AI.speed_easy or AI.speed_hard
+  if GS.ai == strategy.easy then
+    GS.ai = strategy.hard
+  else
+    GS.ai = strategy.easy
+  end
   update_ui()
   sfx.toggle()
 end
 
 actions.start["2"] = function()
   GS.ai = strategy.manual
-  GS.opponent.speed = PADDLE.speed
   GS.input = "keyboard"
   update_ui()
   sfx.toggle()
 end
 
 function actions.start.e()
-  GS.ai = strategy.ai
-  GS.opponent.speed = AI.speed_easy
+  GS.ai = strategy.easy
   GS.input = "mouse"
   update_ui()
   sfx.toggle()

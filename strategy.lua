@@ -13,11 +13,13 @@ function get_dir(current, target, deadzone)
   return (0 < diff) and 1 or -1
 end
 
--- 1. AI Strategy 
+--  Core AI Logic
 
--- Core AI: Manages Attack/Defend states.
+-- Core AI: Manages Attack/Defend states. 
 
-function strategy.ai(pad, ball, dt)
+-- Common logic for both difficulties.
+
+function run_ai(pad, ball, speed_mode)
   local bx, vx = ball.pos.x, ball.vel.x
   local in_zone = (AI.zone_x < bx) and (AI.retreat_v < vx)
   local attack = (vx == 0 and AI.mid_field < bx) or in_zone
@@ -28,11 +30,23 @@ function strategy.ai(pad, ball, dt)
   local ty = attack and (ball.pos.y + noise * AI.noise_range)
        or ball.pos.y
   local center_y = pad.pos.y + PADDLE.half_y
-  pad.vel.x = get_dir(pad.pos.x, tx, AI.dead_x) * pad.speed
-  pad.vel.y = get_dir(center_y, ty, AI.dead_y) * pad.speed
+  pad.vel.x = get_dir(pad.pos.x, tx, AI.dead_x) * speed_mode
+  pad.vel.y = get_dir(center_y, ty, AI.dead_y) * speed_mode
 end
 
--- 2. Manual AI
+-- Easy Strategy: Uses low speed
+
+function strategy.easy(pad, ball, dt)
+  run_ai(pad, ball, AI.speed_easy)
+end
+
+-- Hard Strategy: Uses high speed
+
+function strategy.hard(pad, ball, dt)
+  run_ai(pad, ball, AI.speed_hard)
+end
+
+-- Manual AI
 
 function strategy.manual(pad, ball, dt)
   local is_down = love.keyboard.isDown
