@@ -64,14 +64,11 @@ LIMITS = {
 -- AI Configuration
 
 AI = {
-  retreat_v = -100,
   noise_freq = 1.5,
   noise_range = PADDLE.size.y * 0.9,
   speed_easy = 120,
   speed_hard = 270,
-  mid_field = GAME.width / 2,
   wall_x = LIMITS.opp.max,
-  zone_x = GAME.width * 0.4,
   attack_x = LIMITS.opp.max - 150,
   dead_x = 2,
   dead_y = GAME.ai_deadzone

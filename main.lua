@@ -221,8 +221,8 @@ end
 
 function process_input(dt)
   local p, k = GS.player, love.keyboard.isDown
-  local dy = get_key_direction(k, "a", "q")
-  local dx = get_key_direction(k, "d", "s")
+  local dy = get_key_direction(k, "s", "w")
+  local dx = get_key_direction(k, "d", "a")
   if dx ~= 0 or dy ~= 0 then
     GS.input, p.vel.x, p.vel.y = "keyboard", dx * p.speed, dy * 
         p.speed

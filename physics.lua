@@ -98,14 +98,18 @@ end
 -- 3. RESOLUTION
 
 function bounce(ball, pad, norm)
-  local b_vel, p_vel = ball.vel, pad.vel
-  local rvx = b_vel.x - p_vel.x
-  local rvy = b_vel.y - p_vel.y
-  local dot = (rvx * norm.x) + (rvy * norm.y)
-  local k = GAME.elasticity
-  local ik = 1 - k
-  ball.vel.x = (rvx - 2 * dot * norm.x) * k + p_vel.x * ik
-  ball.vel.y = (rvy - 2 * dot * norm.y) * k + p_vel.y * ik
+  local rv_x = ball.vel.x - pad.vel.x
+  local rv_y = ball.vel.y - pad.vel.y
+  local dot = rv_x * norm.x + rv_y * norm.y
+  local n_x, n_y = dot * norm.x, dot * norm.y
+  local t_x, t_y = rv_x - n_x, rv_y - n_y
+  local e = GAME.elasticity
+  local friction = 0.5
+  n_x, n_y = -n_x * e, -n_y * e
+  local slide = 1 - friction
+  t_x, t_y = t_x * slide, t_y * slide
+  ball.vel.x = pad.vel.x + (n_x + t_x)
+  ball.vel.y = pad.vel.y + (n_y + t_y)
 end
 
 -- Collision candidates
