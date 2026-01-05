@@ -7,7 +7,9 @@ strategy = { }
 
 function get_dir(current, target, deadzone)
   local diff = target - current
-  if math.abs(diff) < deadzone then return 0 end
+  if math.abs(diff) < deadzone then
+    return 0
+  end
   return (0 < diff) and 1 or -1
 end
 
@@ -19,10 +21,10 @@ end
 
 function run_unified_strategy(pad, ball, dt, lim)
   local dx = math.abs(ball.pos.x - pad.pos.x)
-  local atk = (math.abs(ball.vel.x) < 10)
+  local attack = (math.abs(ball.vel.x) < 10)
        or (0 < ball.vel.x and dx < 140)
   local tx, ty = AI.wall_x, ball.pos.y
-  if atk then
+  if attack then
     tx = AI.attack_x
     local t = love.timer.getTime() * AI.noise_freq
     ty = ball.pos.y + (love.math.noise(t) - 0.5) * AI.
