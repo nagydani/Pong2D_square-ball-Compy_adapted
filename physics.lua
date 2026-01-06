@@ -97,19 +97,22 @@ end
 
 -- 3. RESOLUTION
 
+-- Calculates response using Convex Combination.
+
+-- PRECONDITION: 'norm' vector MUST be normalized (length == 1)
+
 function bounce(ball, pad, norm)
   local rv_x = ball.vel.x - pad.vel.x
   local rv_y = ball.vel.y - pad.vel.y
   local dot = rv_x * norm.x + rv_y * norm.y
-  local n_x, n_y = dot * norm.x, dot * norm.y
-  local t_x, t_y = rv_x - n_x, rv_y - n_y
+  local vel_elastic_x = ball.vel.x - 2 * dot * norm.x
+  local vel_elastic_y = ball.vel.y - 2 * dot * norm.y
+  local vel_inelastic_x = pad.vel.x
+  local vel_inelastic_y = pad.vel.y
   local e = GAME.elasticity
-  local friction = 0.5
-  n_x, n_y = -n_x * e, -n_y * e
-  local slide = 1 - friction
-  t_x, t_y = t_x * slide, t_y * slide
-  ball.vel.x = pad.vel.x + (n_x + t_x)
-  ball.vel.y = pad.vel.y + (n_y + t_y)
+  local inv_e = 1 - e
+  ball.vel.x = (vel_elastic_x * e) + (vel_inelastic_x * inv_e)
+  ball.vel.y = (vel_elastic_y * e) + (vel_inelastic_y * inv_e)
 end
 
 -- Collision candidates

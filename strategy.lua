@@ -19,20 +19,21 @@ end
 
 -- Common logic for both difficulties.
 
-function run_unified_strategy(pad, ball, dt, lim)
+function run_unified_strategy(pad, ball, dt, limit)
   local dx = math.abs(ball.pos.x - pad.pos.x)
-  local attack = (math.abs(ball.vel.x) < 10)
-       or (0 < ball.vel.x and dx < 140)
+  local vx = ball.vel.x
+  local attack = (math.abs(vx) < AI.serve_threshold)
+       or (0 < vx and dx < AI.strike_dist)
   local tx, ty = AI.wall_x, ball.pos.y
   if attack then
     tx = AI.attack_x
     local t = love.timer.getTime() * AI.noise_freq
-    ty = ball.pos.y + (love.math.noise(t) - 0.5) * AI.
-        noise_range
+    ty = ball.pos.y + (love.math.noise(t) - AI.noise_offset) * 
+        AI.noise_range
   end
   local cy = pad.pos.y + PADDLE.half_y
-  pad.vel.x = get_dir(pad.pos.x, tx, AI.dead_x) * lim
-  pad.vel.y = get_dir(cy, ty, AI.dead_y) * lim
+  pad.vel.x = get_dir(pad.pos.x, tx, AI.dead_x) * limit
+  pad.vel.y = get_dir(cy, ty, AI.dead_y) * limit
 end
 
 -- Easy Strategy: Uses low speed

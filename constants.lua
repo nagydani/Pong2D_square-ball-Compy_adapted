@@ -66,10 +66,13 @@ LIMITS = {
 AI = {
   noise_freq = 1.5,
   noise_range = PADDLE.size.y * 0.9,
+  noise_offset = 0.5,
   speed_easy = 120,
   speed_hard = 270,
   wall_x = LIMITS.opp.max,
   attack_x = LIMITS.opp.max - 150,
+  strike_dist = 140,
+  serve_threshold = 10,
   dead_x = 2,
   dead_y = GAME.ai_deadzone
 }
