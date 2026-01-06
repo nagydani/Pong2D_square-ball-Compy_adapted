@@ -71,7 +71,6 @@ AI = {
   speed_hard = 270,
   wall_x = LIMITS.opp.max,
   attack_x = LIMITS.opp.max - 150,
-  t_attack = 0.6,
   dead_x = 2,
   dead_y = GAME.ai_deadzone
 }

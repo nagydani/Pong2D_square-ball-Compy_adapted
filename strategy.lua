@@ -20,13 +20,15 @@ end
 -- Common logic for both difficulties.
 
 function run_unified_strategy(pad, ball, dt, limit)
+  local dist = math.abs(AI.attack_x - pad.pos.x)
+  local t_reach = (1 < limit) and (dist / limit) or 0
+  local future_x = ball.pos.x + (ball.vel.x * t_reach)
   local tx, ty = AI.wall_x, ball.pos.y
-  if (math.abs(ball.pos.x - pad.pos.x) / limit) < AI.t_attack
-       then
+  if AI.attack_x < future_x then
     tx = AI.attack_x
     local t = love.timer.getTime() * AI.noise_freq
-    ty = ty + (love.math.noise(t) - AI.noise_offset) * AI.
-        noise_range
+    local noise = love.math.noise(t) - AI.noise_offset
+    ty = ball.pos.y + (noise * AI.noise_range)
   end
   local cy = pad.pos.y + PADDLE.half_y
   pad.vel.x = get_dir(pad.pos.x, tx, AI.dead_x) * limit
