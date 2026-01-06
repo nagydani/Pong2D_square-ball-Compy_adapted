@@ -22,8 +22,8 @@ end
 function run_unified_strategy(pad, ball, dt, limit)
   local dx = math.abs(ball.pos.x - pad.pos.x)
   local vx = ball.vel.x
-  local attack = (math.abs(vx) < AI.serve_threshold)
-       or (0 < vx and dx < AI.strike_dist)
+  local attack = (0 < vx or math.abs(vx) < AI.serve_threshold)
+       and dx < AI.strike_dist
   local tx, ty = AI.wall_x, ball.pos.y
   if attack then
     tx = AI.attack_x
