@@ -20,7 +20,7 @@ end
 -- Common logic for both difficulties.
 
 function run_unified_strategy(pad, ball, dt, limit)
-  local dist = math.abs(AI.attack_x - pad.pos.x)
+  local dist = pad.pos.x - AI.attack_x
   local t_reach = (1 < limit) and (dist / limit) or 0
   local future_x = ball.pos.x + (ball.vel.x * t_reach)
   local tx, ty = AI.wall_x, ball.pos.y
