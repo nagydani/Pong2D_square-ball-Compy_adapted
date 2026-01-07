@@ -15,9 +15,10 @@ GAME = {
   ai_deadzone = 4,
   elasticity = 0.8
 }
+GAME.zone_width = GAME.width / 4
 
 GRID_VIEW = {
-  rows = 6,
+  rows = 12,
   cols = 8
 }
 
@@ -51,10 +52,10 @@ LAYOUT.serve_pos_opp = {
 LIMITS = {
   player = {
     min = PADDLE.off_x,
-    max = (GAME.width / 4) - PADDLE.size.x
+    max = GAME.zone_width - PADDLE.size.x
   },
   opp = {
-    min = GAME.width - (GAME.width / 4),
+    min = GAME.width - GAME.zone_width,
     max = (GAME.width - PADDLE.off_x) - PADDLE.size.x
   },
   y_max = GAME.height - PADDLE.size.y
