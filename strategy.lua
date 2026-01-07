@@ -51,9 +51,9 @@ end
 -- Manual AI
 
 function strategy.manual(pad, ball, dt)
-  local is_down = love.keyboard.isDown
-  local dx = get_key_direction(is_down, "right", "left")
-  local dy = get_key_direction(is_down, "down", "up")
-  pad.vel.x = PADDLE.speed * dx
-  pad.vel.y = PADDLE.speed * dy
+  local k = love.keyboard.isDown
+  local dx = get_key_direction(k, "down", "up")
+  local dy = get_key_direction(k, "right", "left")
+  pad.vel.x = pad.speed * dx
+  pad.vel.y = pad.speed * dy
 end

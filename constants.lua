@@ -16,10 +16,9 @@ GAME = {
   elasticity = 0.8
 }
 
-GRID = {
-  width = 4,
-  dash = 10,
-  gap = 20
+GRID_VIEW = {
+  rows = 6,
+  cols = 8
 }
 
 PADDLE = {
@@ -75,4 +74,18 @@ AI = {
   serve_threshold = 10,
   dead_x = 2,
   dead_y = GAME.ai_deadzone
+}
+
+-- Perspective Configuration
+
+VIEW = {
+  s = 0.67,
+  d = 600,
+  xm = 300,
+  ym = -(GAME.height / 2),
+  h = 355,
+  c = {
+    x = GAME.width / 2,
+    y = 0
+  }
 }

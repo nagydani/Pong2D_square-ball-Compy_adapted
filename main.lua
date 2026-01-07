@@ -19,7 +19,6 @@ GS = {
 }
 
 GS.assets = {
-  canvas = nil,
   text_player = nil,
   text_opponent = nil,
   text_info = nil,
@@ -177,27 +176,12 @@ end
 
 -- Init 
 
-function init_canvas()
-  local c = gfx.newCanvas(GAME.width, GAME.height)
-  gfx.setCanvas(c)
-  gfx.setColor(COLORS.fg)
-  local cx = (GAME.width / 2) - (GRID.width / 2)
-  local y = 0
-  while y < GAME.height do
-    gfx.rectangle("fill", cx, y, GRID.width, GRID.dash)
-    y = y + GRID.dash + GRID.gap
-  end
-  gfx.setCanvas()
-  return c
-end
-
 function init_assets()
   local f = gfx.getFont()
   GS.assets.text_info = gfx.newText(f, "Press Space to Start")
   GS.assets.text_player = gfx.newText(f, "0")
   GS.assets.text_opponent = gfx.newText(f, "0")
   GS.assets.text_mode = gfx.newText(f, "")
-  GS.assets.canvas = init_canvas()
   update_ui()
 end
 
@@ -221,16 +205,16 @@ end
 
 function process_input(dt)
   local p, k = GS.player, love.keyboard.isDown
-  local dy = get_key_direction(k, "s", "w")
-  local dx = get_key_direction(k, "d", "a")
+  local dx = get_key_direction(k, "w", "s")
+  local dy = get_key_direction(k, "d", "a")
   if dx ~= 0 or dy ~= 0 then
-    GS.input, p.vel.x, p.vel.y = "keyboard", dx * p.speed, dy * 
-        p.speed
+    GS.input = "keyboard"
+    p.vel.x, p.vel.y = dx * p.speed, dy * p.speed
     return 
   end
   if GS.mouse.x ~= 0 or GS.mouse.y ~= 0 then
-    GS.input, p.vel.x, p.vel.y = "mouse", GS.mouse.x / dt, GS.
-        mouse.y / dt
+    GS.input = "mouse"
+    p.vel.x, p.vel.y = -GS.mouse.y / dt, GS.mouse.x / dt
     GS.mouse.x, GS.mouse.y = 0, 0
   end
 end
@@ -395,13 +379,64 @@ end
 
 -- Drawing
 
-function draw_objs()
-  gfx.draw(GS.assets.canvas, 0, 0)
-  for _, p in ipairs(GS.paddles) do
-    gfx.rectangle("fill", p.pos.x, p.pos.y, p.size.x, p.size.y)
+-- Perspective Transformation
+
+function project(x, y)
+  local depth = VIEW.xm + x
+  local factor = VIEW.d / depth
+  local sx = VIEW.s * ((VIEW.ym + y) * factor) + VIEW.c.x
+  local sy = VIEW.s * (VIEW.h * factor) + VIEW.c.y
+  return sx, sy, factor
+end
+
+-- Helper: Draws a single line in 3D space
+
+function draw_3d_line(x1, y1, x2, y2)
+  local sx1, sy1 = project(x1, y1)
+  local sx2, sy2 = project(x2, y2)
+  gfx.line(sx1, sy1, sx2, sy2)
+end
+
+-- Draws the perspective grid 
+
+function draw_perspective_grid()
+  local dy = GAME.height / GRID_VIEW.cols
+  for i = 0, GRID_VIEW.cols do
+    draw_3d_line(0, i * dy, GAME.width, i * dy)
   end
+  local dx = GAME.width / GRID_VIEW.rows
+  local mid = GRID_VIEW.rows / 2
+  for i = 0, GRID_VIEW.rows do
+    local current_width = 1
+    if i == mid then
+      current_width = 3
+    end
+    gfx.setLineWidth(current_width)
+    draw_3d_line(i * dx, 0, i * dx, GAME.height)
+  end
+end
+
+-- Draws a paddle as a projected polygon
+
+function draw_paddle(p)
+  local x, y, w, h = p.pos.x, p.pos.y, p.size.x, p.size.y
+  local x1, y1 = project(x, y)
+  local x2, y2 = project(x + w, y)
+  local x3, y3 = project(x + w, y + h)
+  local x4, y4 = project(x, y + h)
+  gfx.polygon("fill", x1, y1, x2, y2, x3, y3, x4, y4)
+end
+
+-- Main Draw Function 
+
+function draw_objs()
+  gfx.setColor(COLORS.fg)
+  draw_perspective_grid()
+  draw_paddle(GS.opponent)
   local b = GS.ball
-  gfx.circle("fill", b.pos.x, b.pos.y, b.radius)
+  local sx, sy, factor = project(b.pos.x, b.pos.y)
+  gfx.circle("fill", sx, sy, b.radius * factor * VIEW.s)
+  draw_paddle(GS.player)
 end
 
 function draw_scores()
