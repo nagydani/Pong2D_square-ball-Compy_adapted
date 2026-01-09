@@ -400,16 +400,15 @@ end
 -- Draws the perspective grid 
 
 function draw_perspective_grid()
-  local g, gv = GAME, GRID_VIEW
-  local z, w, h = g.zone_width, g.width, g.height
-  for i = 0, gv.cols do
-    local y = i * (h / gv.cols)
+  local g, cols, rows = GAME, GRID_VIEW.cols, GRID_VIEW.rows
+  local w, h, z = g.width, g.height, g.zone_width
+  for y = 0, h, h / cols do
     draw_3d_line(0, y, z, y)
     draw_3d_line(w - z, y, w, y)
   end
   draw_3d_line(z, 0, w - z, 0)
   draw_3d_line(z, h, w - z, h)
-  for x = 0, z, w / gv.rows do
+  for x = 0, z, w / rows do
     draw_3d_line(x, 0, x, h)
     draw_3d_line(w - x, 0, w - x, h)
   end
