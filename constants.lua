@@ -52,6 +52,12 @@ COLOR_PAD_OPP = {
   0.2
 }
 
+COLOR_SHADOW = {
+  0,
+  0,
+  0
+}
+
 COLOR_BALL = {
   1,
   1,
@@ -79,12 +85,16 @@ PADDLE = {
     x = 10,
     y = 60
   },
+  height = 45,
   speed = 180 * GAME.speed_scale,
   off_x = 0
 }
 PADDLE.half_y = PADDLE.size.y / 2
 
-BALL = { radius = 10 }
+BALL = {
+  radius = 10,
+  height = 15
+}
 
 -- Dynamic geometry
 

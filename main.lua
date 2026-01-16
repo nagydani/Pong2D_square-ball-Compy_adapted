@@ -400,8 +400,8 @@ end
 -- Bumper Drawer: Handles both Left and Right logic
 
 function draw_bumper_section(y, offset, color)
-  local w, h, sh = GAME.width, BUMPER.height, VIEW.s * BUMPER.
-      height
+  local w, h = GAME.width, BUMPER.height
+  local sh = VIEW.s * BUMPER.height
   local x1, y1, factor1 = project(0, y)
   local x2, y2, factor2 = project(w, y)
   local ty1 = y1 - sh * factor1
@@ -441,23 +441,34 @@ function draw_perspective_grid()
   end
 end
 
--- Draws a paddle as a projected rectangle
+-- Draws a paddle with height 
 
-function draw_paddle(p)
+function draw_paddle(p, color)
   local x, y, w, h = p.pos.x, p.pos.y, p.size.x, p.size.y
-  local x1, y1 = project(x, y)
-  local x2, y2 = project(x + w, y)
-  local x3, y3 = project(x + w, y + h)
-  local x4, y4 = project(x, y + h)
+  local x1, y1, factor1 = project(x, y)
+  local x2, y2, factor2 = project(x + w, y)
+  local x3, y3, factor3 = project(x + w, y + h)
+  local x4, y4, factor4 = project(x, y + h)
+  gfx.setColor(COLOR_SHADOW)
   gfx.polygon("fill", x1, y1, x2, y2, x3, y3, x4, y4)
+  local s = PADDLE.height * VIEW.s
+  local ty1, ty2 = y1 - (s * factor1), y2 - (s * factor2)
+  local ty3, ty4 = y3 - (s * factor3), y4 - (s * factor4)
+  gfx.setColor(color)
+  gfx.polygon("fill", x1, ty1, x2, ty2, x3, ty3, x4, ty4)
 end
 
--- Draws the ball with perspective scaling
+-- Draws the ball with height
 
-function draw_ball()
+function draw_ball(color)
   local b = GS.ball
   local x, y, factor = project(b.pos.x, b.pos.y)
-  gfx.circle("fill", x, y, b.radius * factor * VIEW.s)
+  local r_vis = b.radius * factor * VIEW.s
+  local h_vis = BALL.height * factor * VIEW.s
+  gfx.setColor(COLOR_SHADOW)
+  gfx.circle("fill", x, y, r_vis)
+  gfx.setColor(color)
+  gfx.circle("fill", x, y - h_vis, r_vis)
 end
 
 -- Main Draw Function 
@@ -469,12 +480,9 @@ function draw_objs()
   draw_perspective_grid()
   draw_bumper_section(0, -BUMPER.depth, COLOR_BUMP_L)
   draw_bumper_section(GAME.height, BUMPER.depth, COLOR_BUMP_R)
-  gfx.setColor(COLOR_PAD_OPP)
-  draw_paddle(GS.opponent)
-  gfx.setColor(COLOR_BALL)
-  draw_ball()
-  gfx.setColor(COLOR_PAD_P)
-  draw_paddle(GS.player)
+  draw_ball(COLOR_BALL)
+  draw_paddle(GS.opponent, COLOR_PAD_OPP)
+  draw_paddle(GS.player, COLOR_PAD_P)
 end
 
 function draw_scores()
