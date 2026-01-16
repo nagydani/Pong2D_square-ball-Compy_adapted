@@ -1,9 +1,61 @@
 -- constants.lua
 -- Configuration and Layout
 
-COLORS = {
-  bg = Color[Color.black],
-  fg = Color[Color.white + Color.bright]
+-- Colors (RGB)
+
+COLOR_BG = {
+  0,
+  0,
+  0
+}
+COLOR_FG = {
+  0.8,
+  0.8,
+  0.8
+}
+
+COLOR_FIELD = {
+  0.1,
+  0.1,
+  0.1
+}
+COLOR_GRID = {
+  0.3,
+  0.3,
+  0.3
+}
+
+COLOR_BUMP_TOP = {
+  0.6,
+  0.6,
+  0.6
+}
+COLOR_BUMP_L = {
+  0.4,
+  0.4,
+  0.4
+}
+COLOR_BUMP_R = {
+  0.4,
+  0.4,
+  0.4
+}
+
+COLOR_PAD_P = {
+  0.2,
+  0.4,
+  1
+}
+COLOR_PAD_OPP = {
+  1,
+  0.2,
+  0.2
+}
+
+COLOR_BALL = {
+  1,
+  1,
+  1
 }
 
 GAME = {
@@ -89,4 +141,11 @@ VIEW = {
     x = GAME.width / 2,
     y = 0
   }
+}
+
+-- Bumper parameters
+
+BUMPER = {
+  height = 30,
+  depth = 60
 }

@@ -397,6 +397,34 @@ function draw_3d_line(x1, y1, x2, y2)
   gfx.line(sx1, sy1, sx2, sy2)
 end
 
+-- Bumper Drawer: Handles both Left and Right logic
+
+function draw_bumper_section(y, offset, color)
+  local w, h, sh = GAME.width, BUMPER.height, VIEW.s * BUMPER.
+      height
+  local x1, y1, factor1 = project(0, y)
+  local x2, y2, factor2 = project(w, y)
+  local ty1 = y1 - sh * factor1
+  local ty2 = y2 - sh * factor2
+  gfx.setColor(color)
+  gfx.polygon("fill", x1, y1, x2, y2, x2, ty2, x1, ty1)
+  gfx.setColor(COLOR_BUMP_TOP)
+  local x3 = project(w, y + offset)
+  local x4 = project(0, y + offset)
+  gfx.polygon("fill", x1, ty1, x2, ty2, x3, ty2, x4, ty1)
+end
+
+-- Draws the floor background (The Playing Area)
+
+function draw_field()
+  local w, h = GAME.width, GAME.height
+  local x1, y1 = project(0, 0)
+  local x2, y2 = project(w, 0)
+  local x3 = project(w, h)
+  local x4 = project(0, h)
+  gfx.polygon("fill", x1, y1, x2, y2, x3, y2, x4, y1)
+end
+
 -- Draws the perspective grid 
 
 function draw_perspective_grid()
@@ -413,7 +441,7 @@ function draw_perspective_grid()
   end
 end
 
--- Draws a paddle as a projected polygon
+-- Draws a paddle as a projected rectangle
 
 function draw_paddle(p)
   local x, y, w, h = p.pos.x, p.pos.y, p.size.x, p.size.y
@@ -424,15 +452,28 @@ function draw_paddle(p)
   gfx.polygon("fill", x1, y1, x2, y2, x3, y3, x4, y4)
 end
 
+-- Draws the ball with perspective scaling
+
+function draw_ball()
+  local b = GS.ball
+  local x, y, factor = project(b.pos.x, b.pos.y)
+  gfx.circle("fill", x, y, b.radius * factor * VIEW.s)
+end
+
 -- Main Draw Function 
 
 function draw_objs()
-  gfx.setColor(COLORS.fg)
+  gfx.setColor(COLOR_FIELD)
+  draw_field()
+  gfx.setColor(COLOR_GRID)
   draw_perspective_grid()
+  draw_bumper_section(0, -BUMPER.depth, COLOR_BUMP_L)
+  draw_bumper_section(GAME.height, BUMPER.depth, COLOR_BUMP_R)
+  gfx.setColor(COLOR_PAD_OPP)
   draw_paddle(GS.opponent)
-  local b = GS.ball
-  local sx, sy, factor = project(b.pos.x, b.pos.y)
-  gfx.circle("fill", sx, sy, b.radius * factor * VIEW.s)
+  gfx.setColor(COLOR_BALL)
+  draw_ball()
+  gfx.setColor(COLOR_PAD_P)
   draw_paddle(GS.player)
 end
 
@@ -485,8 +526,7 @@ function love.draw()
   end
   gfx.push()
   gfx.applyTransform(GS.tf)
-  gfx.clear(COLORS.bg)
-  gfx.setColor(COLORS.fg)
+  gfx.clear(COLOR_BG)
   draw_objs()
   draw_ui()
   gfx.pop()
