@@ -441,37 +441,35 @@ function draw_perspective_grid()
   end
 end
 
--- Draws a paddle with height 
+-- Draws a paddle: 0 for shadow, real height for body.
 
-function draw_paddle(p, color)
+function draw_paddle_shape(p, color, height_3d)
   local x, y, w, h = p.pos.x, p.pos.y, p.size.x, p.size.y
   local x1, y1, factor1 = project(x, y)
   local x2, y2, factor2 = project(x + w, y)
   local x3, y3, factor3 = project(x + w, y + h)
   local x4, y4, factor4 = project(x, y + h)
-  gfx.setColor(COLOR_SHADOW)
-  gfx.polygon("fill", x1, y1, x2, y2, x3, y3, x4, y4)
-  local s = PADDLE.height * VIEW.s
-  local ty1, ty2 = y1 - (s * factor1), y2 - (s * factor2)
-  local ty3, ty4 = y3 - (s * factor3), y4 - (s * factor4)
+  local s = height_3d * VIEW.s
+  local ty1 = y1 - (s * factor1)
+  local ty2 = y2 - (s * factor2)
+  local ty3 = y3 - (s * factor3)
+  local ty4 = y4 - (s * factor4)
   gfx.setColor(color)
   gfx.polygon("fill", x1, ty1, x2, ty2, x3, ty3, x4, ty4)
 end
 
--- Draws the ball with height
+-- Draws a ball: 0 for shadow, real height for body.
 
-function draw_ball(color)
+function draw_ball_shape(color, height_3d)
   local b = GS.ball
   local x, y, factor = project(b.pos.x, b.pos.y)
-  local r_vis = b.radius * factor * VIEW.s
-  local h_vis = BALL.height * factor * VIEW.s
-  gfx.setColor(COLOR_SHADOW)
-  gfx.circle("fill", x, y, r_vis)
+  local r = b.radius * factor * VIEW.s
+  local dy = height_3d * factor * VIEW.s
   gfx.setColor(color)
-  gfx.circle("fill", x, y - h_vis, r_vis)
+  gfx.ellipse("fill", x, y - dy, r, r * VIEW.aspect)
 end
 
--- Main Draw Function 
+-- Main draw function
 
 function draw_objs()
   gfx.setColor(COLOR_FIELD)
@@ -480,9 +478,12 @@ function draw_objs()
   draw_perspective_grid()
   draw_bumper_section(0, -BUMPER.depth, COLOR_BUMP_L)
   draw_bumper_section(GAME.height, BUMPER.depth, COLOR_BUMP_R)
-  draw_ball(COLOR_BALL)
-  draw_paddle(GS.opponent, COLOR_PAD_OPP)
-  draw_paddle(GS.player, COLOR_PAD_P)
+  draw_paddle_shape(GS.opponent, COLOR_SHADOW, 0)
+  draw_paddle_shape(GS.player, COLOR_SHADOW, 0)
+  draw_ball_shape(COLOR_SHADOW, 0)
+  draw_ball_shape(COLOR_BALL, BALL.height)
+  draw_paddle_shape(GS.opponent, COLOR_PAD_OPP, PADDLE.height)
+  draw_paddle_shape(GS.player, COLOR_PAD_P, PADDLE.height)
 end
 
 function draw_scores()
