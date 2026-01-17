@@ -452,12 +452,13 @@ function draw_paddle(p)
   gfx.polygon("fill", x1, y1, x2, y2, x3, y3, x4, y4)
 end
 
--- Draws the ball with perspective scaling
+-- Draws the ball as an ellipse (puck) to match perspective
 
 function draw_ball()
   local b = GS.ball
   local x, y, factor = project(b.pos.x, b.pos.y)
-  gfx.circle("fill", x, y, b.radius * factor * VIEW.s)
+  local r = b.radius * factor * VIEW.s
+  gfx.ellipse("fill", x, y, r, r * VIEW.aspect)
 end
 
 -- Main Draw Function 
