@@ -397,21 +397,20 @@ function draw_3d_line(x1, y1, x2, y2)
   gfx.line(sx1, sy1, sx2, sy2)
 end
 
--- Bumper Drawer: Handles both Left and Right logic
+-- Draws a bumper section 
 
-function draw_bumper_section(y, offset, color)
-  local w, h = GAME.width, BUMPER.height
-  local sh = VIEW.s * BUMPER.height
-  local x1, y1, factor1 = project(0, y)
-  local x2, y2, factor2 = project(w, y)
-  local ty1 = y1 - sh * factor1
-  local ty2 = y2 - sh * factor2
-  gfx.setColor(color)
+function draw_bumper_section(y_base, z_offset, color_wall)
+  local w, sh = GAME.width, VIEW.s * BUMPER.height
+  local x1, y1, factor1 = project(0, y_base)
+  local x2, y2, factor2 = project(w, y_base)
+  local ty1, ty2 = y1 - (sh * factor1), y2 - (sh * factor2)
+  gfx.setColor(color_wall)
   gfx.polygon("fill", x1, y1, x2, y2, x2, ty2, x1, ty1)
+  local x3, y3, factor3 = project(w, y_base + z_offset)
+  local x4, y4, factor4 = project(0, y_base + z_offset)
+  local ty3, ty4 = y3 - (sh * factor3), y4 - (sh * factor4)
   gfx.setColor(COLOR_BUMP_TOP)
-  local x3 = project(w, y + offset)
-  local x4 = project(0, y + offset)
-  gfx.polygon("fill", x1, ty1, x2, ty2, x3, ty2, x4, ty1)
+  gfx.polygon("fill", x1, ty1, x2, ty2, x3, ty3, x4, ty4)
 end
 
 -- Draws the floor background (The Playing Area)
@@ -465,8 +464,9 @@ function draw_ball_shape(color, height_3d)
   local x, y, factor = project(b.pos.x, b.pos.y)
   local r = b.radius * factor * VIEW.s
   local dy = height_3d * factor * VIEW.s
+  local depth = VIEW.xm + b.pos.x
   gfx.setColor(color)
-  gfx.ellipse("fill", x, y - dy, r, r * VIEW.aspect)
+  gfx.ellipse("fill", x, y - dy, r, r * (VIEW.h / depth))
 end
 
 -- Main draw function
