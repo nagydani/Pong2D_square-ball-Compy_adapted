@@ -433,7 +433,8 @@ function draw_objs()
   local b = GS.ball
   local sx, sy, factor = project(b.pos.x, b.pos.y)
   local r = b.radius * factor * VIEW.s
-  gfx.ellipse("fill", sx, sy, r, r * VIEW.aspect)
+  local depth = VIEW.xm + b.pos.x
+  gfx.ellipse("fill", sx, sy, r, r * (VIEW.h / depth))
   draw_paddle(GS.player)
 end
 

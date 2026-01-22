@@ -85,7 +85,6 @@ VIEW = {
   xm = 300,
   ym = -(GAME.height / 2),
   h = 355,
-  aspect = 0.35,
   c = {
     x = GAME.width / 2,
     y = 0
