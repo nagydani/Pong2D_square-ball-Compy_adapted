@@ -399,15 +399,14 @@ end
 
 -- Draws a bumper section 
 
-function draw_bumper_section(y_base, z_offset, color_wall)
+function draw_bumper_section(y_base, z_off)
   local w, sh = GAME.width, VIEW.s * BUMPER.height
   local x1, y1, factor1 = project(0, y_base)
   local x2, y2, factor2 = project(w, y_base)
   local ty1, ty2 = y1 - (sh * factor1), y2 - (sh * factor2)
-  gfx.setColor(color_wall)
   gfx.polygon("fill", x1, y1, x2, y2, x2, ty2, x1, ty1)
-  local x3, y3, factor3 = project(w, y_base + z_offset)
-  local x4, y4, factor4 = project(0, y_base + z_offset)
+  local x3, y3, factor3 = project(w, y_base + z_off)
+  local x4, y4, factor4 = project(0, y_base + z_off)
   local ty3, ty4 = y3 - (sh * factor3), y4 - (sh * factor4)
   gfx.setColor(COLOR_BUMP_TOP)
   gfx.polygon("fill", x1, ty1, x2, ty2, x3, ty3, x4, ty4)
@@ -442,48 +441,62 @@ end
 
 -- Draws a paddle: 0 for shadow, real height for body.
 
-function draw_paddle_shape(p, color, height_3d)
+function draw_paddle_top(p, h_3d)
   local x, y, w, h = p.pos.x, p.pos.y, p.size.x, p.size.y
+  local s = h_3d * VIEW.s
   local x1, y1, factor1 = project(x, y)
   local x2, y2, factor2 = project(x + w, y)
   local x3, y3, factor3 = project(x + w, y + h)
   local x4, y4, factor4 = project(x, y + h)
-  local s = height_3d * VIEW.s
-  local ty1 = y1 - (s * factor1)
-  local ty2 = y2 - (s * factor2)
-  local ty3 = y3 - (s * factor3)
-  local ty4 = y4 - (s * factor4)
-  gfx.setColor(color)
+  local ty1, ty2 = y1 - (s * factor1), y2 - (s * factor2)
+  local ty3, ty4 = y3 - (s * factor3), y4 - (s * factor4)
   gfx.polygon("fill", x1, ty1, x2, ty2, x3, ty3, x4, ty4)
 end
 
 -- Draws a ball: 0 for shadow, real height for body.
 
-function draw_ball_shape(color, height_3d)
+function draw_ball_top(h_3d)
   local b = GS.ball
   local x, y, factor = project(b.pos.x, b.pos.y)
   local r = b.radius * factor * VIEW.s
-  local dy = height_3d * factor * VIEW.s
+  local dy = h_3d * factor * VIEW.s
   local depth = VIEW.xm + b.pos.x
-  gfx.setColor(color)
   gfx.ellipse("fill", x, y - dy, r, r * (VIEW.h / depth))
 end
 
--- Main draw function
+-- Main draw functions
 
-function draw_objs()
+function draw_layer_env()
   gfx.setColor(COLOR_FIELD)
   draw_field()
   gfx.setColor(COLOR_GRID)
   draw_perspective_grid()
-  draw_bumper_section(0, -BUMPER.depth, COLOR_BUMP_L)
-  draw_bumper_section(GAME.height, BUMPER.depth, COLOR_BUMP_R)
-  draw_paddle_shape(GS.opponent, COLOR_SHADOW, 0)
-  draw_paddle_shape(GS.player, COLOR_SHADOW, 0)
-  draw_ball_shape(COLOR_SHADOW, 0)
-  draw_ball_shape(COLOR_BALL, BALL.height)
-  draw_paddle_shape(GS.opponent, COLOR_PAD_OPP, PADDLE.height)
-  draw_paddle_shape(GS.player, COLOR_PAD_P, PADDLE.height)
+  gfx.setColor(COLOR_BUMP_L)
+  draw_bumper_section(0, -BUMPER.depth)
+  gfx.setColor(COLOR_BUMP_R)
+  draw_bumper_section(GAME.height, BUMPER.depth)
+end
+
+function draw_layer_shadows()
+  gfx.setColor(COLOR_SHADOW)
+  draw_paddle_top(GS.opponent, 0)
+  draw_paddle_top(GS.player, 0)
+  draw_ball_top(0)
+end
+
+function draw_layer_tops()
+  gfx.setColor(COLOR_BALL)
+  draw_ball_top(BALL.height)
+  gfx.setColor(COLOR_PAD_OPP)
+  draw_paddle_top(GS.opponent, PADDLE.height)
+  gfx.setColor(COLOR_PAD_P)
+  draw_paddle_top(GS.player, PADDLE.height)
+end
+
+function draw_objs()
+  draw_layer_env()
+  draw_layer_shadows()
+  draw_layer_tops()
 end
 
 function draw_scores()
