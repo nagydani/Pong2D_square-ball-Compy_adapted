@@ -295,8 +295,7 @@ function check_score(now)
   local win = nil
   if x + r < 0 then
     win = "opponent"
-  end
-  if GAME.width < x - r then
+  elseif GAME.width < x - r then
     win = "player"
   end
   if win then
@@ -505,9 +504,6 @@ function draw_scores()
 end
 
 function draw_info()
-  if GS.mode == "play" then
-    return 
-  end
   local ti = GS.assets.text_info
   local xi = center_text_x(ti)
   local yi = GAME.height * 0.4 - ti:getHeight() / 2
@@ -522,32 +518,32 @@ end
 
 function draw_ui()
   draw_scores()
-  draw_info()
+  if GS.mode ~= "play" then
+    draw_info()
+  end
 end
 
 -- Main Loop 
 
 function love.update(dt)
   ensure_init()
-  if GS.mode ~= "play" then
-    return 
+  if GS.mode == "play" then
+    local now = timer.getTime()
+    update_pads_input(dt)
+    update_ball(dt, now)
+    move_pads(dt)
   end
-  local now = timer.getTime()
-  update_pads_input(dt)
-  update_ball(dt, now)
-  move_pads(dt)
 end
 
 function love.draw()
-  if not GS.init then
-    return 
+  if GS.init then
+    gfx.push()
+    gfx.applyTransform(GS.tf)
+    gfx.clear(COLOR_BG)
+    draw_objs()
+    draw_ui()
+    gfx.pop()
   end
-  gfx.push()
-  gfx.applyTransform(GS.tf)
-  gfx.clear(COLOR_BG)
-  draw_objs()
-  draw_ui()
-  gfx.pop()
 end
 
 function love.mousemoved(x, y, dx, dy)
