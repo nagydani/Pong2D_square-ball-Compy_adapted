@@ -182,14 +182,13 @@ function init_assets()
 end
 
 function ensure_init()
-  if GS.init then
-    return 
+  if not GS.init then
+    update_scale()
+    init_assets()
+    reset_round(timer.getTime())
+    GS.init = true
+    love.mouse.setRelativeMode(true)
   end
-  update_scale()
-  init_assets()
-  reset_round(timer.getTime())
-  GS.init = true
-  love.mouse.setRelativeMode(true)
 end
 
 -- Logic 
