@@ -145,20 +145,16 @@ function reset_ball_pos(serve_vector)
   b.vel.x, b.vel.y = 0, 0
 end
 
-function get_strat_name()
-  if GS.ai == strategy.manual then 
-    return "2 Players (Manual)" 
-  end
-  if GS.ai == strategy.easy then 
-    return "1 Player (Easy)" 
-  end
-  return "1 Player (Hard)"
-end
+strat_name = {
+  [strategy.manual] = "2 Players (Manual)",
+  [strategy.easy] = "1 Player (Easy)",
+  [strategy.hard] = "1 Player (Hard)"
+}
 
 function update_ui()
   GS.assets.text_player:set(GS.score.player)
   GS.assets.text_opponent:set(GS.score.opponent)
-  GS.assets.text_mode:set(get_strat_name())
+  GS.assets.text_mode:set(strat_name[GS.ai])
 end
 
 function reset_round(now)
