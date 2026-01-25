@@ -46,12 +46,21 @@ COLOR_PAD_P = {
   0.4,
   1
 }
+COLOR_PAD_P_SIDE = {
+  0.1,
+  0.2,
+  0.5
+}
 COLOR_PAD_OPP = {
   1,
   0.2,
   0.2
 }
-
+COLOR_PAD_OPP_SIDE = {
+  0.5,
+  0.1,
+  0.1
+}
 COLOR_SHADOW = {
   0,
   0,
@@ -62,6 +71,11 @@ COLOR_BALL = {
   1,
   1,
   1
+}
+COLOR_BALL_SIDE = {
+  0.5,
+  0.5,
+  0.5
 }
 
 GAME = {

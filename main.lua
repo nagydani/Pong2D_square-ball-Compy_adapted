@@ -39,6 +39,8 @@ GS.ai = strategy.hard
 -- Entities (Unified Vectors: pos, vel, size)
 
 GS.player = {
+  color = COLOR_PAD_P,
+  color_side = COLOR_PAD_P_SIDE,
   pos = {
     x = 0,
     y = 0
@@ -53,6 +55,8 @@ GS.player = {
 }
 
 GS.opponent = {
+  color = COLOR_PAD_OPP,
+  color_side = COLOR_PAD_OPP_SIDE,
   pos = {
     x = 0,
     y = 0
@@ -67,6 +71,8 @@ GS.opponent = {
 }
 
 GS.ball = {
+  color = COLOR_BALL,
+  color_side = COLOR_BALL_SIDE,
   pos = {
     x = 0,
     y = 0
@@ -439,6 +445,17 @@ function draw_perspective_grid()
   end
 end
 
+-- Draws a vertical (frontal) paddle face 
+
+function draw_paddle_face(x1, y1, x2, y2)
+  local h = PADDLE.height * VIEW.s
+  local sx1, sy1, factor1 = project(x1, y1)
+  local sx2, sy2, factor2 = project(x2, y2)
+  local ty1 = sy1 - (h * factor1)
+  local ty2 = sy2 - (h * factor2)
+  gfx.polygon("fill", sx1, sy1, sx2, sy2, sx2, ty2, sx1, ty1)
+end
+
 -- Draws a paddle: 0 for shadow, real height for body.
 
 function draw_paddle_top(p, h_3d)
@@ -453,15 +470,38 @@ function draw_paddle_top(p, h_3d)
   gfx.polygon("fill", x1, ty1, x2, ty2, x3, ty3, x4, ty4)
 end
 
--- Draws a ball: 0 for shadow, real height for body.
+-- Draws the vertical walls (side) of the paddle
 
-function draw_ball_top(h_3d)
+function draw_paddle_sides(p)
+  local dx, dy = p.pos.x, p.pos.y
+  local w, h = p.size.x, p.size.y
+  local center = GAME.height / 2
+  gfx.setColor(p.color_side)
+  if center < dy then
+    draw_paddle_face(dx, dy, dx + w, dy)
+  elseif dy + h < center then
+    draw_paddle_face(dx, dy + h, dx + w, dy + h)
+  end
+  draw_paddle_face(dx, dy, dx, dy + h)
+end
+
+-- Draws ball: shadow (h=0) or full 3D body (h>0)
+
+function draw_ball(h_real)
   local b = GS.ball
   local x, y, factor = project(b.pos.x, b.pos.y)
   local r = b.radius * factor * VIEW.s
-  local dy = h_3d * factor * VIEW.s
-  local depth = VIEW.xm + b.pos.x
-  gfx.ellipse("fill", x, y - dy, r, r * (VIEW.h / depth))
+  local depth = (VIEW.h * factor) / VIEW.d
+  if h_real == 0 then
+    gfx.ellipse("fill", x, y, r, r * depth)
+    return 
+  end
+  local h = h_real * factor * VIEW.s
+  gfx.setColor(b.color_side)
+  gfx.ellipse("fill", x, y, r, r * depth)
+  gfx.rectangle("fill", x - r, y - h, r * 2, h)
+  gfx.setColor(b.color)
+  gfx.ellipse("fill", x, y - h, r, r * depth)
 end
 
 -- Main draw functions
@@ -477,26 +517,38 @@ function draw_layer_env()
   draw_bumper_section(GAME.height, BUMPER.depth)
 end
 
-function draw_layer_shadows()
-  gfx.setColor(COLOR_SHADOW)
-  draw_paddle_top(GS.opponent, 0)
-  draw_paddle_top(GS.player, 0)
-  draw_ball_top(0)
+function draw_flat_surfaces(h)
+  if h == 0 then
+    gfx.setColor(COLOR_SHADOW)
+    draw_ball(0)
+  end
+  for _, p in ipairs(GS.paddles) do
+    if 0 < h then
+      gfx.setColor(p.color)
+    end
+    draw_paddle_top(p, h)
+  end
 end
 
-function draw_layer_tops()
-  gfx.setColor(COLOR_BALL)
-  draw_ball_top(BALL.height)
-  gfx.setColor(COLOR_PAD_OPP)
-  draw_paddle_top(GS.opponent, PADDLE.height)
-  gfx.setColor(COLOR_PAD_P)
-  draw_paddle_top(GS.player, PADDLE.height)
+function draw_layered()
+  local bx = GS.ball.pos.x
+  for i = 1, 2 do
+    if i == 2 then
+      draw_ball(BALL.height)
+    end
+    for _, p in ipairs(GS.paddles) do
+      if (i == 1) == (bx < p.pos.x) then
+        draw_paddle_sides(p)
+      end
+    end
+  end
 end
 
 function draw_objs()
   draw_layer_env()
-  draw_layer_shadows()
-  draw_layer_tops()
+  draw_flat_surfaces(0)
+  draw_layered()
+  draw_flat_surfaces(PADDLE.height)
 end
 
 function draw_scores()
@@ -525,6 +577,7 @@ function draw_info()
 end
 
 function draw_ui()
+  gfx.setColor(1, 1, 1)
   draw_scores()
   draw_info()
 end
