@@ -456,7 +456,7 @@ function draw_paddle_face(x1, y1, x2, y2)
   gfx.polygon("fill", sx1, sy1, sx2, sy2, sx2, ty2, sx1, ty1)
 end
 
--- Draws a paddle: 0 for shadow, real height for body.
+-- Draws a paddle:  real height for body.
 
 function draw_paddle_top(p, h_3d)
   local x, y, w, h = p.pos.x, p.pos.y, p.size.x, p.size.y
@@ -470,32 +470,13 @@ function draw_paddle_top(p, h_3d)
   gfx.polygon("fill", x1, ty1, x2, ty2, x3, ty3, x4, ty4)
 end
 
--- Draws the vertical walls (side) of the paddle
-
-function draw_paddle_sides(p)
-  local dx, dy = p.pos.x, p.pos.y
-  local w, h = p.size.x, p.size.y
-  local center = GAME.height / 2
-  gfx.setColor(p.color_side)
-  if center < dy then
-    draw_paddle_face(dx, dy, dx + w, dy)
-  elseif dy + h < center then
-    draw_paddle_face(dx, dy + h, dx + w, dy + h)
-  end
-  draw_paddle_face(dx, dy, dx, dy + h)
-end
-
--- Draws ball: shadow (h=0) or full 3D body (h>0)
+-- Draws ball: full 3D body 
 
 function draw_ball(h_real)
   local b = GS.ball
   local x, y, factor = project(b.pos.x, b.pos.y)
   local r = b.radius * factor * VIEW.s
   local depth = (VIEW.h * factor) / VIEW.d
-  if h_real == 0 then
-    gfx.ellipse("fill", x, y, r, r * depth)
-    return 
-  end
   local h = h_real * factor * VIEW.s
   gfx.setColor(b.color_side)
   gfx.ellipse("fill", x, y, r, r * depth)
@@ -503,8 +484,6 @@ function draw_ball(h_real)
   gfx.setColor(b.color)
   gfx.ellipse("fill", x, y - h, r, r * depth)
 end
-
--- Main draw functions
 
 function draw_layer_env()
   gfx.setColor(COLOR_FIELD)
@@ -517,38 +496,66 @@ function draw_layer_env()
   draw_bumper_section(GAME.height, BUMPER.depth)
 end
 
-function draw_flat_surfaces(h)
-  if h == 0 then
-    gfx.setColor(COLOR_SHADOW)
-    draw_ball(0)
-  end
+-- Draws paddle tops
+
+function draw_top_surfaces(h)
   for _, p in ipairs(GS.paddles) do
-    if 0 < h then
-      gfx.setColor(p.color)
-    end
+    gfx.setColor(p.color)
     draw_paddle_top(p, h)
   end
 end
 
+-- Helper: Draws the front face (parallel to screen).
+
+function draw_front_face(p, ball_depth, pass)
+  local px, py, ph = p.pos.x, p.pos.y, p.size.y
+  local is_deeper = (ball_depth < px)
+  if (pass == 1) == is_deeper then
+    draw_paddle_face(px, py, px, py + ph)
+  end
+end
+
+-- Helper: Draws the side face (perpendicular to screen).
+
+function draw_side_face(p, by, vy, pass)
+  local wall_y
+  if vy < p.pos.y then
+    wall_y = p.pos.y
+  elseif p.pos.y + p.size.y < vy then
+    wall_y = p.pos.y + p.size.y
+  end
+  if wall_y then
+    local same_side = (by < wall_y) == (vy < wall_y)
+    if (pass == 1) == same_side then
+      local px, pw = p.pos.x, p.size.x
+      draw_paddle_face(px, wall_y, px + pw, wall_y)
+    end
+  end
+end
+
+-- Handles the sorting of vertical surfaces vs puck
+
 function draw_layered()
-  local bx = GS.ball.pos.x
+  local bx, by = GS.ball.pos.x, GS.ball.pos.y
+  local vy = GAME.height / 2
   for i = 1, 2 do
     if i == 2 then
       draw_ball(BALL.height)
     end
     for _, p in ipairs(GS.paddles) do
-      if (i == 1) == (bx < p.pos.x) then
-        draw_paddle_sides(p)
-      end
+      gfx.setColor(p.color_side)
+      draw_front_face(p, bx, i)
+      draw_side_face(p, by, vy, i)
     end
   end
 end
 
+-- Main draw function
+
 function draw_objs()
   draw_layer_env()
-  draw_flat_surfaces(0)
   draw_layered()
-  draw_flat_surfaces(PADDLE.height)
+  draw_top_surfaces(PADDLE.height)
 end
 
 function draw_scores()

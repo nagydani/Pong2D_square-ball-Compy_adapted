@@ -1,4 +1,5 @@
 -- constants.lua
+
 -- Configuration and Layout
 
 -- Colors (RGB)
@@ -60,11 +61,6 @@ COLOR_PAD_OPP_SIDE = {
   0.5,
   0.1,
   0.1
-}
-COLOR_SHADOW = {
-  0,
-  0,
-  0
 }
 
 COLOR_BALL = {
