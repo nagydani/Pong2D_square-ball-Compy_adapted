@@ -151,20 +151,16 @@ function reset_ball_pos(serve_vector)
   b.vel.x, b.vel.y = 0, 0
 end
 
-function get_strat_name()
-  if GS.ai == strategy.manual then 
-    return "2 Players (Manual)" 
-  end
-  if GS.ai == strategy.easy then 
-    return "1 Player (Easy)" 
-  end
-  return "1 Player (Hard)"
-end
+strat_name = {
+  [strategy.manual] = "2 Players (Manual)",
+  [strategy.easy] = "1 Player (Easy)",
+  [strategy.hard] = "1 Player (Hard)"
+}
 
 function update_ui()
   GS.assets.text_player:set(GS.score.player)
   GS.assets.text_opponent:set(GS.score.opponent)
-  GS.assets.text_mode:set(get_strat_name())
+  GS.assets.text_mode:set(strat_name[GS.ai])
 end
 
 function reset_round(now)
@@ -192,14 +188,13 @@ function init_assets()
 end
 
 function ensure_init()
-  if GS.init then
-    return 
+  if not GS.init then
+    update_scale()
+    init_assets()
+    reset_round(timer.getTime())
+    GS.init = true
+    love.mouse.setRelativeMode(true)
   end
-  update_scale()
-  init_assets()
-  reset_round(timer.getTime())
-  GS.init = true
-  love.mouse.setRelativeMode(true)
 end
 
 -- Logic 
@@ -305,8 +300,7 @@ function check_score(now)
   local win = nil
   if x + r < 0 then
     win = "opponent"
-  end
-  if GAME.width < x - r then
+  elseif GAME.width < x - r then
     win = "player"
   end
   if win then
@@ -568,9 +562,6 @@ function draw_scores()
 end
 
 function draw_info()
-  if GS.mode == "play" then
-    return 
-  end
   local ti = GS.assets.text_info
   local xi = center_text_x(ti)
   local yi = GAME.height * 0.4 - ti:getHeight() / 2
@@ -584,34 +575,33 @@ function draw_info()
 end
 
 function draw_ui()
-  gfx.setColor(1, 1, 1)
   draw_scores()
-  draw_info()
+  if GS.mode ~= "play" then
+    draw_info()
+  end
 end
 
 -- Main Loop 
 
 function love.update(dt)
   ensure_init()
-  if GS.mode ~= "play" then
-    return 
+  if GS.mode == "play" then
+    local now = timer.getTime()
+    update_pads_input(dt)
+    update_ball(dt, now)
+    move_pads(dt)
   end
-  local now = timer.getTime()
-  update_pads_input(dt)
-  update_ball(dt, now)
-  move_pads(dt)
 end
 
 function love.draw()
-  if not GS.init then
-    return 
+  if GS.init then
+    gfx.push()
+    gfx.applyTransform(GS.tf)
+    gfx.clear(COLOR_BG)
+    draw_objs()
+    draw_ui()
+    gfx.pop()
   end
-  gfx.push()
-  gfx.applyTransform(GS.tf)
-  gfx.clear(COLOR_BG)
-  draw_objs()
-  draw_ui()
-  gfx.pop()
 end
 
 function love.mousemoved(x, y, dx, dy)
