@@ -30,10 +30,7 @@ GS.score = {
   opponent = 0
 }
 
-GS.mouse = {
-  x = 0,
-  y = 0
-}
+GS.mouse = zero2d()
 GS.ai = strategy.hard
 
 -- Entities (Unified Vectors: pos, vel, size)
@@ -41,14 +38,8 @@ GS.ai = strategy.hard
 GS.player = {
   color = COLOR_PAD_P,
   color_side = COLOR_PAD_P_SIDE,
-  pos = {
-    x = 0,
-    y = 0
-  },
-  vel = {
-    x = 0,
-    y = 0
-  },
+  pos = zero2d(),
+  vel = zero2d(),
   size = PADDLE.size,
   limits = LIMITS.player,
   speed = PADDLE.speed
@@ -57,14 +48,8 @@ GS.player = {
 GS.opponent = {
   color = COLOR_PAD_OPP,
   color_side = COLOR_PAD_OPP_SIDE,
-  pos = {
-    x = 0,
-    y = 0
-  },
-  vel = {
-    x = 0,
-    y = 0
-  },
+  pos = zero2d(),
+  vel = zero2d(),
   size = PADDLE.size,
   limits = LIMITS.opp,
   speed = AI.speed_hard
@@ -73,19 +58,10 @@ GS.opponent = {
 GS.ball = {
   color = COLOR_BALL,
   color_side = COLOR_BALL_SIDE,
-  pos = {
-    x = 0,
-    y = 0
-  },
-  vel = {
-    x = 0,
-    y = 0
-  },
+  pos = zero2d(),
+  vel = zero2d(),
   radius = BALL.radius,
-  snapshot = {
-    x = 0,
-    y = 0
-  },
+  snapshot = zero2d(),
   st = 0
 }
 
