@@ -4,21 +4,19 @@
 
 -- Pre-allocated buffers
 
-V_REL = {
-  x = 0,
-  y = 0
-}
-D_VEC = {
-  x = 0,
-  y = 0
-}
-
-CORNER_BUFF = { }
-for i = 1, 4 do
-  CORNER_BUFF[i] = {
+function zero2d()
+  return {
     x = 0,
     y = 0
   }
+end
+
+V_REL = zero2d()
+D_VEC = zero2d()
+
+CORNER_BUFF = { }
+for i = 1, 4 do
+  CORNER_BUFF[i] = zero2d()
 end
 
 -- Helpers
@@ -122,18 +120,9 @@ coll = {
   y = { },
   c = { }
 }
-coll.x.n = {
-  x = 0,
-  y = 0
-}
-coll.y.n = {
-  x = 0,
-  y = 0
-}
-coll.c.n = {
-  x = 0,
-  y = 0
-}
+coll.x.n = zero2d()
+coll.y.n = zero2d()
+coll.c.n = zero2d()
 
 function select_earliest_impact()
   local best = nil
