@@ -134,8 +134,14 @@ strat_name = {
 }
 
 function update_ui()
-  GS.assets.text_player:set(GS.score.player)
-  GS.assets.text_opponent:set(GS.score.opponent)
+  GS.assets.text_player:set({
+    COLOR_PAD_P,
+    GS.score.player
+  })
+  GS.assets.text_opponent:set({
+    COLOR_PAD_OPP,
+    GS.score.opponent
+  })
   GS.assets.text_mode:set(strat_name[GS.ai])
 end
 
@@ -157,8 +163,14 @@ end
 function init_assets()
   local f = gfx.getFont()
   GS.assets.text_info = gfx.newText(f, "Press Space to Start")
-  GS.assets.text_player = gfx.newText(f, "0")
-  GS.assets.text_opponent = gfx.newText(f, "0")
+  GS.assets.text_player = gfx.newText(f, {
+    COLOR_PAD_P,
+    "0"
+  })
+  GS.assets.text_opponent = gfx.newText(f, {
+    COLOR_PAD_OPP,
+    "0"
+  })
   GS.assets.text_mode = gfx.newText(f, "")
   update_ui()
 end
