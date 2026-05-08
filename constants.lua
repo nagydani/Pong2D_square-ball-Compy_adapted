@@ -14,6 +14,11 @@ COLOR_FG = {
   0.8,
   0.8
 }
+COLOR_WHITE = {
+  1,
+  1,
+  1
+}
 
 COLOR_FIELD = {
   0.1,

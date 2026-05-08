@@ -563,6 +563,7 @@ function draw_info()
 end
 
 function draw_ui()
+  gfx.setColor(COLOR_WHITE)
   draw_scores()
   if GS.mode ~= "play" then
     draw_info()
