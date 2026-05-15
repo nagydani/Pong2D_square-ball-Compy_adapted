@@ -86,7 +86,7 @@ GAME = {
   score_win = 10,
   score_off_y = 20,
   ai_deadzone = 4,
-  elasticity = 0.8
+  elasticity = 0.5
 }
 GAME.zone_width = GAME.width / 4
 
@@ -107,7 +107,7 @@ PADDLE = {
 PADDLE.half_y = PADDLE.size.y / 2
 
 BALL = {
-  radius = 10,
+  radius = 15,
   height = 15
 }
 

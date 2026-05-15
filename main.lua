@@ -31,7 +31,7 @@ GS.score = {
 }
 
 GS.mouse = zero2d()
-GS.ai = strategy.hard
+GS.ai = strategy.easy
 
 -- Entities (Unified Vectors: pos, vel, size)
 
@@ -313,7 +313,8 @@ end
 actions = {
   start = { },
   play = { },
-  over = { }
+  over = { },
+  paused = { }
 }
 
 function actions.start.space()
@@ -361,7 +362,21 @@ end
 actions.over.space = actions.play.r
 actions.over.r = actions.play.r
 
-for k, v in pairs(actions) do
+function toggle_pause()
+  if GS.mode == "play" then
+    GS.mode = "paused"
+    GS.assets.text_info:set("Paused")
+    love.mouse.setRelativeMode(false)
+  else
+    GS.mode = "play"
+    love.mouse.setRelativeMode(true)
+  end
+end
+
+actions.play.pause = toggle_pause
+actions.paused.pause = toggle_pause
+
+for _, v in pairs(actions) do
   v.escape = love.event.quit
 end
 
@@ -601,6 +616,12 @@ function love.mousemoved(x, y, dx, dy)
 end
 
 function love.keypressed(k)
+  if k == "escape" then
+    local d = love.keyboard.isDown
+    if not (d("lshift") or d("rshift")) then
+      return
+    end
+  end
   local action = actions[GS.mode][k]
   if action then
     action()
