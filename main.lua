@@ -100,6 +100,15 @@ function integrate_position(pos, vel, dt)
   pos.y = pos.y + vel.y * dt
 end
 
+function cap_vel(vel, max)
+  local mag2 = vel.x * vel.x + vel.y * vel.y
+  if mag2 <= max * max then
+    return
+  end
+  local scale = max / math.sqrt(mag2)
+  vel.x, vel.y = vel.x * scale, vel.y * scale
+end
+
 function update_scale()
   local w, h = gfx.getDimensions()
   local sx = w / GAME.width
@@ -204,6 +213,7 @@ function process_input(dt)
   if GS.mouse.x ~= 0 or GS.mouse.y ~= 0 then
     GS.input = "mouse"
     p.vel.x, p.vel.y = -GS.mouse.y / dt, GS.mouse.x / dt
+    cap_vel(p.vel, PADDLE.max_vel)
     GS.mouse.x, GS.mouse.y = 0, 0
   end
 end

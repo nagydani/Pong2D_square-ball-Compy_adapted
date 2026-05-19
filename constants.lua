@@ -102,7 +102,8 @@ PADDLE = {
   },
   height = 45,
   speed = 180 * GAME.speed_scale,
-  off_x = 0
+  off_x = 0,
+  max_vel = 1200
 }
 PADDLE.half_y = PADDLE.size.y / 2
 
