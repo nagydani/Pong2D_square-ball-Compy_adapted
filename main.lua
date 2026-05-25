@@ -318,7 +318,7 @@ function update_ball(dt, now)
   check_score(now)
 end
 
--- Controls 
+-- Controls
 
 actions = {
   start = { },
@@ -334,29 +334,29 @@ function actions.start.space()
   sfx.beep()
 end
 
-actions.start["1"] = function()
-  GS.input = "mouse"
-  if GS.ai == strategy.easy then
-    GS.ai = strategy.hard
-  else
-    GS.ai = strategy.easy
+function set_strategy(ai, input)
+  GS.ai = ai
+  GS.input = input
+  update_ui()
+  sfx.toggle()
+end
+
+function make_picker(ai, input)
+  return function()
+    set_strategy(ai, input)
   end
-  update_ui()
-  sfx.toggle()
 end
 
-actions.start["2"] = function()
-  GS.ai = strategy.manual
-  GS.input = "keyboard"
-  update_ui()
-  sfx.toggle()
-end
+actions.start.e = make_picker(strategy.easy, "mouse")
+actions.start.h = make_picker(strategy.hard, "mouse")
+actions.start["2"] = make_picker(strategy.manual, "keyboard")
 
-function actions.start.e()
-  GS.ai = strategy.easy
-  GS.input = "mouse"
-  update_ui()
-  sfx.toggle()
+actions.start["1"] = function()
+  local next_ai = strategy.easy
+  if GS.ai == strategy.easy then
+    next_ai = strategy.hard
+  end
+  set_strategy(next_ai, "mouse")
 end
 
 function actions.play.r()
